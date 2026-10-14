@@ -13,7 +13,7 @@ This lab is now being used on a different Windows PC with the same portable driv
 - Internal `D:` drive is separate and had 55.5 GB free at the check. Do not redirect lab data to it.
 - Current PC: Intel Core i3 4th generation, 4 logical processors (reported 3.5 GHz), 16 GB RAM, NVIDIA Quadro P400 with 2 GB dedicated VRAM. GPU acceleration is not needed for Wazuh.
 - `.wslconfig` is host-specific and remains under `%USERPROFILE%\.wslconfig`; current configured values are `memory=8GB`, `processors=4`, `swap=4GB`, `swapFile=E:\\CyberLab\\WSL\\wsl-swap.vhdx`, and `kernelCommandLine="sysctl.vm.max_map_count=262144"`.
-- Command `wsl -d Alpine -- sh -lc 'cat /etc/alpine-release; cat /proc/sys/vm/max_map_count'` returned Alpine `3.23.3` and `262144`. Previous lab notes reported Alpine `3.24.2`; this version discrepancy is unresolved. Do not reinstall or upgrade before confirming which VHDX is the intended existing distro.
+- WSL registry inspection confirmed the currently registered `Alpine` distribution has `BasePath: D:\WSL\Alpine` and VHDX `D:\WSL\Alpine\ext4.vhdx`. This appears to be the older/local installation the user had installed previously; it reports Alpine `3.23.3` and `vm.max_map_count=262144`. A separate candidate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, but it is not the currently registered `Alpine` base path. Previous project setup recorded Alpine `3.24.2`. Compare both VHDX files' size/timestamps before deciding which to use. Do not unregister, overwrite, re-import, or upgrade either instance yet.
 - `E:\\CyberLab\\Tools\\DockerDesktop\\Docker Desktop.exe` exists, and `E:\\CyberLab\\DockerData` contains `disk` and `main` directories.
 - On this PC, `Get-Command docker` returned no result and `docker` was not recognized. `wsl --list --verbose` listed Alpine only; Docker Desktop has not yet been confirmed running/registered on this host.
 - Do not assume the presence of Docker data folders proves the old images and volumes are usable. Start the existing Docker Desktop application and verify the effective disk-image location and containers before pulling images, changing data location, or initializing another backend.
@@ -24,6 +24,7 @@ Next host-resume sequence:
 2. Launch `E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe`.
 3. Wait for Docker Desktop to finish starting, then check `Get-Command docker`, `wsl --list --verbose`, and `docker info`.
 4. In Docker Desktop Settings, verify the WSL 2 backend and inspect the disk image location. Do not change the data location until the existing data is identified.
+5. Inspect metadata for both `D:\WSL\Alpine\ext4.vhdx` and `E:\CyberLab\WSL\Alpine\ext4.vhdx`; preserve both until the intended distro is determined.
 5. From `E:\CyberLab\Projects\wazuh-docker\single-node`, inspect `docker compose ps -a`; do not run `down -v`.
 6. Recheck indexer health and endpoint integration; the earlier machine's green cluster result does not automatically prove current-host health.
 
