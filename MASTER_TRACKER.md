@@ -192,3 +192,18 @@ The desired future state is a **portable lab kit**, not one all-in-one container
 - [ ] Evaluate a dedicated SSH-test endpoint container later, after the existing telemetry flow is working.
 
 Docker Desktop still needs to be installed/configured on each target Windows host. An external Docker data root is an advanced option, not a guarantee of plug-and-play operation. See [Portable SOC Lab Plan](PORTABILITY_PLAN.md).
+
+
+## Docker installation verification — 14 October 2026
+
+Verified on the new Windows host after temporarily prepending `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin` to the current PowerShell session's `PATH`:
+
+- Docker Desktop per-user installation exists at `C:\Users\R123\AppData\Local\Programs\DockerDesktop`.
+- Docker CLI version: `29.8.2`; Docker Compose: `v5.5.1`.
+- `docker info` successfully reached the server using context `desktop-linux`; backend reports Docker Desktop with Linux kernel `6.18.54.1-microsoft-standard-WSL2`.
+- Reported capacity: 4 CPUs and 7.758 GiB memory.
+- **Current Docker backend reports 0 containers and 0 images.** This means no Wazuh containers/images are currently visible in this backend; it does not prove whether Wazuh files, backups, or another Docker data store exist on E:.
+- The PATH change was session-only. Persist the user PATH entry after confirming it is not already present, then open a new PowerShell window and verify it.
+- Next: inspect `E:\CyberLab\Projects\wazuh-docker\single-node`, `E:\CyberLab\DockerData\disk`, and `E:\CyberLab\DockerData\main` before recreating the stack or changing Docker storage. Do not delete or relocate anything during discovery.
+
+Official references: [Docker Desktop Windows installation and per-user mode](https://docs.docker.com/desktop/setup/install/windows-install/), [WSL 2 backend and default data location](https://docs.docker.com/desktop/features/wsl/), [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/).
