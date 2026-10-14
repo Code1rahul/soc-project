@@ -254,3 +254,12 @@ Observed Docker WSL VHDX file lengths:
 - Current host `%LOCALAPPDATA%\Docker\wsl\main\ext4.vhdx`: 0.09 GB, last written 14 Oct 2026.
 
 The E: disk is likely the previous Docker data store, but contents are not independently validated. File length is not necessarily equal to allocated space for a dynamic VHDX. Before recovery, inspect Docker Desktop → Settings → Resources → Advanced → Disk image location and report the current path. Never move the VHDX in File Explorer, and don't choose an option that replaces the E: disk. Don't run `docker compose up` until we decide whether to use the preserved data disk or recreate images/containers from the validated Compose file.
+
+
+## Backup completed; restore not started — 14 October 2026
+
+Robocopy copied both files from `E:\CyberLab\DockerData` to `E:\CyberLab\Backups\DockerData-pre-recovery-20261014`, reporting zero failures. Reported lengths match: `docker_data.vhdx` 45.15 GB and `main\ext4.vhdx` 0.09 GB. This is size-based verification; SHA-256 comparison has not been performed. Do not delete either copy.
+
+Docker Desktop currently uses `C:\Users\R123\AppData\Local\Docker\wsl`; C: had 18.79 GB free. The E: disk is likely the previous environment but its contents have not yet been validated. Do not set the UI location to the existing `E:\CyberLab\DockerData` folder because that could collide with the old disk. If relocating the current empty Docker backend to E:, use a separate **new empty destination** such as `E:\CyberLab\DockerDesktop-Active`, verify the move, and only then design the restore step for the old data disk. No restore or replacement has been attempted yet.
+
+Official guidance: [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/). Fully stop Docker Desktop before direct disk backup/restore.
