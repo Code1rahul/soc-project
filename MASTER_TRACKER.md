@@ -223,3 +223,16 @@ Latest PowerShell inspection found:
 These sizes are reported file lengths; actual allocated space can differ for dynamically expanding VHDX files. The E: data disk is a strong candidate for the previous Docker Desktop data store, but that is not yet confirmed by opening it. Current active Docker engine has zero containers, images, and named volumes. The Wazuh Compose configuration at `E:\CyberLab\Projects\wazuh-docker\single-node` passed `docker compose config --quiet`.
 
 **Next safe action:** inspect the current Docker Desktop setting at Settings → Resources → Advanced → Disk image location. Do not move files manually, use the new path, select a replacement action, or run `docker compose up` until the intended existing data disk has been identified. If restoring via the supported Docker Desktop UI, the UI may ask whether to use an existing disk image or replace it; do not choose replacement for the E: disk. Keep all personal files outside lab actions.
+
+
+## Docker Desktop storage setting verified — 14 October 2026
+
+User screenshot confirms Settings → Resources → Advanced → Disk image location is currently `C:\Users\R123\AppData\Local\Docker\wsl` (the default local WSL data location). Do not change it until the larger E: data disk is preserved and a recovery approach is chosen.
+
+Observed file lengths:
+- Potential previous data disk: `E:\CyberLab\DockerData\disk\docker_data.vhdx` — 45.15 GB.
+- Current data disk: `C:\Users\R123\AppData\Local\Docker\wsl\disk\docker_data.vhdx` — 1.56 GB.
+- Current engine reports no visible images, containers or named volumes.
+- The E: file is a recovery candidate, not yet verified as healthy or as containing the old Wazuh stack.
+
+Next check: get free space on C: and confirm the two data disk paths still exist. Do not click Browse/Apply, move VHDX files, or replace files while Docker is running. Follow Docker's official backup/restore process, which requires Docker Desktop fully stopped before backing up/restoring the WSL 2 `docker_data.vhdx`.
