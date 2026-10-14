@@ -22,7 +22,7 @@ A hands-on home lab for learning SOC workflows: collecting authentication teleme
 - Every meaningful step explains both **what we do** and **why**.
 - Keep useful technical phases; do not skip them solely to conserve model usage.
 - Preserve evidence and record both successes and failures.
-- Keep lab data under `D:\CyberLab` where supported.
+- Keep lab data under `E:\CyberLab` where supported.
 - Never commit credentials, API tokens, private keys, unsanitized PCAP files, or sensitive host logs.
 
 ## Documentation
@@ -47,3 +47,7 @@ The Wazuh dashboard and indexer should remain private to the lab host. Review Do
 ## Versioning
 
 This repository contains the public, sanitized project documentation. The live environment and evidence files remain on the lab machine unless deliberately sanitized and added for publication.
+
+## Current system / portability
+
+The project is currently being used on a different Windows PC with the same portable drive mounted as `E:`. Keep lab paths under `E:\CyberLab` where supported. The internal `D:` drive is not the lab drive. See [Master Tracker](MASTER_TRACKER.md) and [Lab Operations](LAB_OPERATIONS.md) for the current-host handover. Do not unplug the portable drive while WSL/Docker are running.
