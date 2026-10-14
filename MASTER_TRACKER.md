@@ -241,3 +241,19 @@ Next check: get free space on C: and confirm the two data disk paths still exist
 ## Pre-recovery backup prerequisite — 14 October 2026
 
 Latest user-observed figures: C: has 18.79 GB free; E: has more than 400 GB free from the earlier drive check. The old portable Docker data disk is 45.15 GB by file length, so do not copy it to C:. Before changing Docker's disk-image setting, make a separate offline backup on E: of the whole `E:\CyberLab\DockerData` directory (including both `disk\docker_data.vhdx` and `main\ext4.vhdx`). Quit Docker Desktop and run `wsl --shutdown` first, wait for Docker/WSL processes to exit, then copy the folder to `E:\CyberLab\Backups\DockerData-pre-recovery-20261014`. Verify source and backup file lengths before any restoration attempt. Docker's official instructions require Docker Desktop to be fully stopped before backing up its WSL data disk. Do not move, overwrite, mount, or select the existing E: disk in the UI before this backup exists.
+
+
+## Offline DockerData backup completed — 14 October 2026
+
+User reported that Robocopy completed with 0 failed files and copied both VHDX files to `E:\CyberLab\Backups\DockerData-pre-recovery-20261014` while Docker Desktop processes were not running after `wsl --shutdown`.
+
+| File | Source length | Backup length |
+|---|---:|---:|
+| `disk\docker_data.vhdx` | 45.15 GB | 45.15 GB |
+| `main\ext4.vhdx` | 0.09 GB | 0.09 GB |
+
+This verifies successful copy exit status and matching reported file lengths; no cryptographic hash comparison has been performed. Preserve the original `E:\CyberLab\DockerData` and backup copy.
+
+The current Docker Desktop disk-image location was confirmed in Settings as `C:\Users\R123\AppData\Local\Docker\wsl`. Do not choose `E:\CyberLab\DockerData` as a destination that could overwrite the older disk. If moving the current clean Docker data location to E:, choose a **new empty folder**, such as `E:\CyberLab\DockerDesktop-Active`, then inspect the resulting folder tree before any restore attempt. Current C: free space was 18.79 GB, so do not copy the 45.15 GB virtual disk to C:.
+
+Official recovery reference: [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/). Docker says to fully stop Docker Desktop before copying/restoring the WSL data disk and, after reinstalling, restore `docker_data.vhdx` to the configured disk's corresponding location. Follow a reversible staged procedure; do not overwrite the active disk before preserving it.
