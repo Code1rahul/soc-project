@@ -119,3 +119,15 @@ Never publish credentials, tokens, private keys, default passwords, raw unsaniti
 ## WSL registration clarification
 
 The current `Alpine` registration points to `D:\WSL\Alpine\ext4.vhdx`; this is likely the older local distro mentioned by the user. The candidate `E:\CyberLab\WSL\Alpine\ext4.vhdx` exists separately and is not currently registered as `Alpine`. The next step is a read-only comparison of both file sizes and timestamps; do not make destructive changes until the correct lab instance is identified.
+
+
+## Alpine VHDX comparison — 14 October 2026
+
+Observed PowerShell metadata:
+
+| Path | Size reported | Created | Last written | Interpretation |
+|---|---:|---|---|---|
+| `D:\WSL\Alpine\ext4.vhdx` | 11.59 GB | 28 Mar 2026 20:24:57 | 14 Oct 2026 21:08:40 | Strong candidate for the older long-used local Alpine installation. It is the distro currently registered as `Alpine`. |
+| `E:\CyberLab\WSL\Alpine\ext4.vhdx` | 0.10 GB | 4 Oct 2026 22:55:25 | 11 Oct 2026 02:15:58 | Strong candidate for the newer portable-drive project import. It is not currently registered under the `Alpine` name. Contents/version must be verified before relying on this inference. |
+
+Recommended next step: preserve both disks and register the E: candidate as a second distro named `AlpineLab` using WSL's documented `wsl --import-in-place` command. Then verify its Alpine version, user, `/etc/wsl.conf`, SSH, and syslog. Do not run `wsl --unregister Alpine`, and do not delete either VHDX.
