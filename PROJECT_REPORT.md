@@ -1,8 +1,18 @@
 # SOC Home Lab — Project Progress Report
 
-**Snapshot:** 11 October 2026  
+**Snapshot:** 14 October 2026  
 **Status:** Wazuh 4.14.8 deployed; indexer reported green; dashboard login confirmed; Alpine telemetry ingestion pending.  
 **Project type:** Controlled home lab / SOC investigation case study.
+
+## Current host handover — 14 October 2026
+
+The same portable lab drive is now attached to a different Windows computer and is mounted as `E:`. No drive migration is intended. The portable drive reports 422.4 GB free; internal `D:` reports 55.5 GB free and is not the lab storage target.
+
+This host reports an Intel Core i3 4th generation CPU (4 logical processors, stated 3.5 GHz), 16 GB RAM, and an NVIDIA Quadro P400 with 2 GB dedicated VRAM. WSL global configuration is set to 8 GB memory maximum, four processors, 4 GB swap, with the swap path configured on E:.
+
+**Environment discrepancy:** Alpine now reports 3.23.3 on this host, while previous project sessions recorded 3.24.2. The reason has not been established; do not upgrade/reinstall until the intended VHDX is confirmed.
+
+Docker Desktop's executable exists at `E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe`, and `E:\CyberLab\DockerData` contains `disk` and `main` folders. However, PowerShell did not resolve the `docker` command and WSL listed only Alpine. Therefore the previous Wazuh deployment is not yet confirmed available on this host. Start Docker Desktop and confirm the existing data image and containers before taking any cleanup or reinstall action.
 
 ## Executive summary
 
@@ -17,7 +27,7 @@ The project uses a validation-first method: inspect current state, install only 
 - **Windows analyst workstation:** PowerShell, Nmap, Wireshark and Docker Desktop.
 - **Alpine Linux 3.24.2 on WSL2:** `analyst` user, `doas`, OpenSSH, BusyBox syslogd, and `/var/log/messages`.
 - **Wazuh 4.14.8 single-node stack:** Manager, Indexer, and Dashboard via Docker Compose.
-- **Storage rule:** lab-specific files and evidence are kept under `D:\CyberLab` wherever supported.
+- **Storage rule:** lab-specific files and evidence are kept under `E:\CyberLab` wherever supported.
 
 ## Completed work
 
