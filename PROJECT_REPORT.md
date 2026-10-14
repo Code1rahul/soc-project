@@ -10,7 +10,7 @@ The same portable lab drive is now attached to a different Windows computer and 
 
 This host reports an Intel Core i3 4th generation CPU (4 logical processors, stated 3.5 GHz), 16 GB RAM, and an NVIDIA Quadro P400 with 2 GB dedicated VRAM. WSL global configuration is set to 8 GB memory maximum, four processors, 4 GB swap, with the swap path configured on E:.
 
-**Environment discrepancy:** Alpine now reports 3.23.3 on this host, while previous project sessions recorded 3.24.2. The reason has not been established; do not upgrade/reinstall until the intended VHDX is confirmed.
+**Environment discrepancy clarified:** WSL registry inspection shows the currently registered `Alpine` points to `D:\WSL\Alpine\ext4.vhdx` and reports 3.23.3. A separate `E:\CyberLab\WSL\Alpine\ext4.vhdx` exists but is not the currently registered distro path. Previous project sessions reported Alpine 3.24.2. The E: VHDX may be the project instance, but its identity is not yet verified; compare file metadata before changing registration. Do not unregister, overwrite, or re-import either VHDX.
 
 Docker Desktop's executable exists at `E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe`, and `E:\CyberLab\DockerData` contains `disk` and `main` folders. However, PowerShell did not resolve the `docker` command and WSL listed only Alpine. Therefore the previous Wazuh deployment is not yet confirmed available on this host. Start Docker Desktop and confirm the existing data image and containers before taking any cleanup or reinstall action.
 
@@ -114,3 +114,8 @@ The Wazuh indexer health was green and the dashboard login worked, but no endpoi
 ## Publication hygiene
 
 Never publish credentials, tokens, private keys, default passwords, raw unsanitized PCAPs, or logs containing sensitive data. Redact hostnames/IPs where appropriate. The project is a self-owned simulation and should be described transparently as such.
+
+
+## WSL registration clarification
+
+The current `Alpine` registration points to `D:\WSL\Alpine\ext4.vhdx`; this is likely the older local distro mentioned by the user. The candidate `E:\CyberLab\WSL\Alpine\ext4.vhdx` exists separately and is not currently registered as `Alpine`. The next step is a read-only comparison of both file sizes and timestamps; do not make destructive changes until the correct lab instance is identified.
