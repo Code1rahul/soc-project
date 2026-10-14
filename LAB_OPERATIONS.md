@@ -200,3 +200,23 @@ Open Docker Desktop, wait for the engine, then run the Start section above.
 | Indexer health is not green or timeouts recur | Save logs and resource stats before changing anything. |
 | Dashboard loads but no agents are shown | This is not proof of Alpine log ingestion; choose and validate the intended collection path. |
 | TCP bind fails | Inspect the Compose port mapping and Windows excluded port ranges before changing ports. |
+
+
+## Portability target — read before modifying Docker storage
+
+The target is a **portable lab kit**, not a Docker container that makes the whole drive bootable. Compose files, the Alpine VHDX, sanitized evidence, and backups travel on E:. Each Windows host still needs WSL 2 and a working Docker Desktop installation/engine.
+
+Current successful check: `AlpineLab` is registered from `E:\CyberLab\WSL\Alpine\ext4.vhdx`; it reports Alpine `3.24.2`, user `analyst`, and the expected `/etc/wsl.conf`. The earlier `Alpine` distro on D: is separate and must remain untouched while validating the project endpoint.
+
+Before touching Docker storage on this host:
+1. Start the existing Docker Desktop executable and prove `docker info` has a Server section.
+2. Inspect the current Docker Desktop backend and disk/data location in its supported settings.
+3. Inspect `E:\CyberLab\DockerData\disk` and `main`; do not delete, rename, or point an installation at these folders until their purpose is known.
+4. From the existing Wazuh Compose directory, inspect containers and volumes before changing them.
+5. Keep personal files elsewhere on E: out of all Compose bind mounts and scripts.
+
+Recommended first design: keep the lab configuration and evidence portable, keep Docker-managed database/indexer data in its supported Linux storage, and create tested backups for state that must travel. Only evaluate locating Docker's WSL data root on E: after this audit. Docker documents a `--wsl-default-data-root=<path>` installer option, but this does not remove the per-host runtime requirements or the risk of an unsafe USB disconnect.
+
+Never unplug E: while Docker/WSL is running. Stop the Compose services without deleting volumes, quit Docker Desktop, close WSL sessions, run `wsl --shutdown`, and wait for VHDX files to become idle before disconnecting.
+
+See [Portable SOC Lab Plan](PORTABILITY_PLAN.md) for the options, proposed layout, and staged implementation.
