@@ -30,6 +30,7 @@ A hands-on home lab for learning SOC workflows: collecting authentication teleme
 - [Master Tracker](MASTER_TRACKER.md) — current state, checklist, issues, and handover.
 - [Project Report](PROJECT_REPORT.md) — outcomes, evidence, and lessons learned.
 - [Lab Operations](LAB_OPERATIONS.md) — how to start, verify, and stop the lab safely.
+- [Portable SOC Lab Plan](PORTABILITY_PLAN.md) — portable-drive architecture, host dependencies, and safe implementation roadmap.
 
 ## Planned milestones
 
@@ -51,3 +52,8 @@ This repository contains the public, sanitized project documentation. The live e
 ## Current system / portability
 
 The project is currently being used on a different Windows PC with the same portable drive mounted as `E:`. Keep lab paths under `E:\CyberLab` where supported. The internal `D:` drive is not the lab drive. See [Master Tracker](MASTER_TRACKER.md) and [Lab Operations](LAB_OPERATIONS.md) for the current-host handover. Do not unplug the portable drive while WSL/Docker are running.
+
+
+## Portability goal
+
+The lab is being organized as a portable kit under `E:\CyberLab`, not as a single container or a drive-wide Docker disk. The Compose recipe, validated Alpine WSL VHDX, sanitized evidence, scripts, and backups should travel with the external drive. Each Windows PC still needs a working WSL 2/Docker runtime. Unrelated personal files on the drive must remain untouched. See [Portable SOC Lab Plan](PORTABILITY_PLAN.md).
