@@ -241,3 +241,16 @@ if (-not ($entries | Where-Object { $_.TrimEnd('\') -ieq $dockerBin.TrimEnd('\')
 ```
 
 Then verify `docker --version`, `docker compose version`, and `docker info` in a newly opened PowerShell window. This modifies only the current user's PATH; it does not relocate Docker storage. Docker Desktop's default WSL data location is normally under `%LOCALAPPDATA%\Docker\wsl`, but verify **Settings → Resources → Advanced** before inferring where this host's backing disk actually resides. See [Docker's official WSL backend and data location documentation](https://docs.docker.com/desktop/features/wsl/).
+
+
+## Docker data-disk inventory before recovery — 14 October 2026
+
+The Compose configuration validated successfully with `docker compose config --quiet`. Current engine reports zero containers, zero images, and zero named volumes.
+
+Observed Docker WSL VHDX file lengths:
+- Portable `E:\CyberLab\DockerData\disk\docker_data.vhdx`: 45.15 GB, last written 11 Oct 2026.
+- Portable `E:\CyberLab\DockerData\main\ext4.vhdx`: 0.09 GB, last written 11 Oct 2026.
+- Current host `%LOCALAPPDATA%\Docker\wsl\disk\docker_data.vhdx`: 1.56 GB, last written 14 Oct 2026.
+- Current host `%LOCALAPPDATA%\Docker\wsl\main\ext4.vhdx`: 0.09 GB, last written 14 Oct 2026.
+
+The E: disk is likely the previous Docker data store, but contents are not independently validated. File length is not necessarily equal to allocated space for a dynamic VHDX. Before recovery, inspect Docker Desktop → Settings → Resources → Advanced → Disk image location and report the current path. Never move the VHDX in File Explorer, and don't choose an option that replaces the E: disk. Don't run `docker compose up` until we decide whether to use the preserved data disk or recreate images/containers from the validated Compose file.
