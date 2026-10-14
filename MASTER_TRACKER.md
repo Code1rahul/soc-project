@@ -176,3 +176,19 @@ Observed PowerShell metadata:
 | `E:\CyberLab\WSL\Alpine\ext4.vhdx` | 0.10 GB | 4 Oct 2026 22:55:25 | 11 Oct 2026 02:15:58 | Strong candidate for the newer portable-drive project import. It is not currently registered under the `Alpine` name. Contents/version must be verified before relying on this inference. |
 
 Recommended next step: preserve both disks and register the E: candidate as a second distro named `AlpineLab` using WSL's documented `wsl --import-in-place` command. Then verify its Alpine version, user, `/etc/wsl.conf`, SSH, and syslog. Do not run `wsl --unregister Alpine`, and do not delete either VHDX.
+
+
+## Portability design and current state — 14 October 2026
+
+**This section supersedes earlier lines above that described the E: Alpine VHDX as not yet registered.** The user successfully ran `wsl --import-in-place AlpineLab "E:\CyberLab\WSL\Alpine\ext4.vhdx"`. The result is registered as `AlpineLab` (WSL 2), reports Alpine `3.24.2`, runs as `analyst` (UID 1000, member of `wheel`), and has the expected `/etc/wsl.conf` with default user and boot script.
+
+The desired future state is a **portable lab kit**, not one all-in-one container and not the entire external drive used as Docker storage. Keep Compose files, the Alpine VHDX, sanitized evidence, scripts, and backups under `E:\CyberLab`. Unrelated personal files on E: are out of scope.
+
+- [ ] Launch Docker Desktop on this host and prove `docker info` works before changing Docker data or Compose state.
+- [ ] Inventory `E:\CyberLab\DockerData\disk` and `main`; do not delete/reinitialize them.
+- [ ] Inspect existing Wazuh containers and volumes before bringing anything down or recreating it.
+- [ ] Create tested Compose-based start/stop/preflight scripts; never use `docker compose down -v` for routine shutdown.
+- [ ] Add a backup/restore plan for Wazuh data that needs to survive host changes.
+- [ ] Evaluate a dedicated SSH-test endpoint container later, after the existing telemetry flow is working.
+
+Docker Desktop still needs to be installed/configured on each target Windows host. An external Docker data root is an advanced option, not a guarantee of plug-and-play operation. See [Portable SOC Lab Plan](PORTABILITY_PLAN.md).
