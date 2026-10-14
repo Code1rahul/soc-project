@@ -21,7 +21,7 @@ Before launch:
 - The global `.wslconfig` is stored in the current Windows user profile, not on the portable drive.
 - The current PC's `Get-Command docker` returned nothing even though the Docker Desktop executable exists on E:. Launch the existing executable first; if Docker CLI remains unavailable, verify the installation/integration on this Windows host rather than recloning the project or deleting DockerData.
 - Verify Docker Desktop Settings > Resources/Advanced shows the intended disk-image location before starting or changing containers.
-- WSL registry inspection confirmed the current `Alpine` distro uses `D:\WSL\Alpine\ext4.vhdx` and reports 3.23.3. A separate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, while previous lab sessions used 3.24.2. Compare sizes and timestamps of the two VHDX files before deciding which instance to run. Do not unregister, upgrade, overwrite, or re-import either yet.
+- WSL registry inspection confirmed the current `Alpine` distro uses `D:\WSL\Alpine\ext4.vhdx` and reports 3.23.3. A separate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, while previous lab sessions used 3.24.2. The size/timestamp comparison shows D: is 11.59 GB (created 28 Mar 2026), while E: is 0.10 GB (created 4 Oct 2026). D: is likely the older local distro; E: is likely the recent portable lab import, but verify its contents. Preserve both.
 
 ```powershell
 Start-Process 'E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe'
@@ -53,8 +53,20 @@ The registered distribution currently points to `D:\WSL\Alpine\ext4.vhdx`. A sec
 
 Do not unregister, overwrite, or re-import either one until the intended instance is identified.
 
-## Start the lab
+## Register and inspect the portable Alpine candidate (safe additive check)
 
+Microsoft documents `wsl --import-in-place <Name> <FileName>` for registering an existing ext4-formatted WSL VHDX as another distribution. This does not require deleting the older `Alpine` registration. Use a new name so both installations remain available.
+
+```powershell
+wsl --shutdown
+wsl --import-in-place AlpineLab 'E:\CyberLab\WSL\Alpine\ext4.vhdx'
+wsl --list --verbose
+wsl -d AlpineLab -- sh -lc 'cat /etc/alpine-release; id; cat /etc/wsl.conf 2>/dev/null; ls -l /var/log/messages 2>/dev/null'
+```
+
+Stop if WSL reports that the file is invalid or already registered under another name; do not force it. Verify the version, `analyst` account, SSH, and syslog before designating this as the project endpoint. Never unregister `Alpine` or delete either VHDX while still identifying the correct instance.
+
+## Start the lab
 ### 1. Start Docker Desktop
 Open Docker Desktop and wait for the engine to become available.
 
