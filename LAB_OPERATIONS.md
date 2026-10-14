@@ -4,12 +4,38 @@ This guide is for the local SOC lab. It intentionally uses manual, transparent c
 
 ## Layout
 
-- Wazuh Compose directory: `D:\CyberLab\Projects\wazuh-docker\single-node`
-- Lab evidence root: `D:\CyberLab\Evidence`
-- Packet captures: `D:\CyberLab\PCAP`
-- Alpine WSL distribution: `D:\CyberLab\WSL\Alpine`
+- Wazuh Compose directory: `E:\CyberLab\Projects\wazuh-docker\single-node`
+- Lab evidence root: `E:\CyberLab\Evidence`
+- Packet captures: `E:\CyberLab\PCAP`
+- Alpine WSL distribution: `E:\CyberLab\WSL\Alpine`
 - Global WSL config file: `%USERPROFILE%\.wslconfig` (Windows-managed location; do not relocate this file)
 - WSL swap file is configured on D: in the user's current WSL config.
+
+## Portable drive / new Windows host notes
+
+This lab drive is portable and is currently mounted as `E:`. The internal `D:` drive is not the lab volume. Keep all project paths under `E:\CyberLab` where supported.
+
+Before launch:
+- Make sure the portable drive is connected and mounted as `E:`.
+- Do not disconnect it while WSL or Docker is running.
+- The global `.wslconfig` is stored in the current Windows user profile, not on the portable drive.
+- The current PC's `Get-Command docker` returned nothing even though the Docker Desktop executable exists on E:. Launch the existing executable first; if Docker CLI remains unavailable, verify the installation/integration on this Windows host rather than recloning the project or deleting DockerData.
+- Verify Docker Desktop Settings > Resources/Advanced shows the intended disk-image location before starting or changing containers.
+- Alpine reported 3.23.3 on the new host, different from the earlier recorded 3.24.2. Do not upgrade or re-import until the intended existing distro is confirmed.
+
+```powershell
+Start-Process 'E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe'
+```
+
+After Docker Desktop finishes starting, verify:
+
+```powershell
+Get-Command docker -ErrorAction SilentlyContinue
+wsl --list --verbose
+docker info
+```
+
+If the CLI is still not recognized, do not assume the existing DockerData was imported or delete it. Inspect the actual installation and Docker Desktop settings first.
 
 ## Start the lab
 
@@ -30,7 +56,7 @@ Check that `docker info` includes a Server section.
 ### 2. Go to the Compose directory
 
 ```powershell
-Set-Location 'D:\CyberLab\Projects\wazuh-docker\single-node'
+Set-Location 'E:\CyberLab\Projects\wazuh-docker\single-node'
 ```
 
 ### 3. Validate the Compose configuration before starting
