@@ -7,9 +7,9 @@ This guide is for the local SOC lab. It intentionally uses manual, transparent c
 - Wazuh Compose directory: `E:\CyberLab\Projects\wazuh-docker\single-node`
 - Lab evidence root: `E:\CyberLab\Evidence`
 - Packet captures: `E:\CyberLab\PCAP`
-- Alpine WSL distribution: `E:\CyberLab\WSL\Alpine`
+- Currently registered Alpine WSL distribution: `D:\WSL\Alpine` (reports version 3.23.3; likely the older/local install). Candidate portable-drive VHDX: `E:\CyberLab\WSL\Alpine\ext4.vhdx` (exists but is not the current registered path).
 - Global WSL config file: `%USERPROFILE%\.wslconfig` (Windows-managed location; do not relocate this file)
-- WSL swap file is configured on D: in the user's current WSL config.
+- WSL swap file is configured at `E:\CyberLab\WSL\wsl-swap.vhdx` in the current host's `.wslconfig`.
 
 ## Portable drive / new Windows host notes
 
@@ -21,7 +21,7 @@ Before launch:
 - The global `.wslconfig` is stored in the current Windows user profile, not on the portable drive.
 - The current PC's `Get-Command docker` returned nothing even though the Docker Desktop executable exists on E:. Launch the existing executable first; if Docker CLI remains unavailable, verify the installation/integration on this Windows host rather than recloning the project or deleting DockerData.
 - Verify Docker Desktop Settings > Resources/Advanced shows the intended disk-image location before starting or changing containers.
-- Alpine reported 3.23.3 on the new host, different from the earlier recorded 3.24.2. Do not upgrade or re-import until the intended existing distro is confirmed.
+- WSL registry inspection confirmed the current `Alpine` distro uses `D:\WSL\Alpine\ext4.vhdx` and reports 3.23.3. A separate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, while previous lab sessions used 3.24.2. Compare sizes and timestamps of the two VHDX files before deciding which instance to run. Do not unregister, upgrade, overwrite, or re-import either yet.
 
 ```powershell
 Start-Process 'E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe'
@@ -36,6 +36,22 @@ docker info
 ```
 
 If the CLI is still not recognized, do not assume the existing DockerData was imported or delete it. Inspect the actual installation and Docker Desktop settings first.
+
+## Compare both Alpine VHDX files before choosing an instance
+
+The registered distribution currently points to `D:\WSL\Alpine\ext4.vhdx`. A second VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`. Use read-only metadata checks first:
+
+```powershell
+@('D:\WSL\Alpine\ext4.vhdx','E:\CyberLab\WSL\Alpine\ext4.vhdx') | ForEach-Object {
+    if (Test-Path $_) {
+        Get-Item $_ | Select-Object FullName, Length, CreationTime, LastWriteTime
+    } else {
+        Write-Host "Missing: $_"
+    }
+}
+```
+
+Do not unregister, overwrite, or re-import either one until the intended instance is identified.
 
 ## Start the lab
 
