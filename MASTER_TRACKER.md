@@ -207,3 +207,19 @@ Verified on the new Windows host after temporarily prepending `%LOCALAPPDATA%\Pr
 - Next: inspect `E:\CyberLab\Projects\wazuh-docker\single-node`, `E:\CyberLab\DockerData\disk`, and `E:\CyberLab\DockerData\main` before recreating the stack or changing Docker storage. Do not delete or relocate anything during discovery.
 
 Official references: [Docker Desktop Windows installation and per-user mode](https://docs.docker.com/desktop/setup/install/windows-install/), [WSL 2 backend and default data location](https://docs.docker.com/desktop/features/wsl/), [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/).
+
+
+## Docker data-disk comparison — 14 October 2026
+
+Latest PowerShell inspection found:
+
+| Location | File | Reported file length | Last write |
+|---|---|---:|---|
+| Portable drive | `E:\CyberLab\DockerData\disk\docker_data.vhdx` | 45.15 GB | 11 Oct 2026 02:23 |
+| Portable drive | `E:\CyberLab\DockerData\main\ext4.vhdx` | 0.09 GB | 11 Oct 2026 02:24 |
+| Current host | `%LOCALAPPDATA%\Docker\wsl\disk\docker_data.vhdx` | 1.56 GB | 14 Oct 2026 22:16 |
+| Current host | `%LOCALAPPDATA%\Docker\wsl\main\ext4.vhdx` | 0.09 GB | 14 Oct 2026 22:10 |
+
+These sizes are reported file lengths; actual allocated space can differ for dynamically expanding VHDX files. The E: data disk is a strong candidate for the previous Docker Desktop data store, but that is not yet confirmed by opening it. Current active Docker engine has zero containers, images, and named volumes. The Wazuh Compose configuration at `E:\CyberLab\Projects\wazuh-docker\single-node` passed `docker compose config --quiet`.
+
+**Next safe action:** inspect the current Docker Desktop setting at Settings → Resources → Advanced → Disk image location. Do not move files manually, use the new path, select a replacement action, or run `docker compose up` until the intended existing data disk has been identified. If restoring via the supported Docker Desktop UI, the UI may ask whether to use an existing disk image or replace it; do not choose replacement for the E: disk. Keep all personal files outside lab actions.
