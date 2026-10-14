@@ -1,9 +1,31 @@
 # Master Tracker — SOC Home Lab
 
-**Updated:** 11 October 2026  
+**Updated:** 14 October 2026  
 **Repository:** `Code1rahul/soc-project`  
-**Working lab path:** `D:\CyberLab`  
-**Current stage:** Wazuh deployed; dashboard login confirmed; endpoint ingestion pending.
+**Working lab path:** `E:\CyberLab`  
+**Current stage:** Portable-drive handover to new Windows PC; Docker Desktop CLI/engine availability is pending on this host.
+
+## Current host / portable-drive handover — 14 October 2026
+
+This lab is now being used on a different Windows PC with the same portable drive. This is **not a migration**: keep the drive mounted as `E:` and continue using the existing files.
+
+- Portable lab drive: `E:\CyberLab`; reported free space 422.4 GB.
+- Internal `D:` drive is separate and had 55.5 GB free at the check. Do not redirect lab data to it.
+- Current PC: Intel Core i3 4th generation, 4 logical processors (reported 3.5 GHz), 16 GB RAM, NVIDIA Quadro P400 with 2 GB dedicated VRAM. GPU acceleration is not needed for Wazuh.
+- `.wslconfig` is host-specific and remains under `%USERPROFILE%\.wslconfig`; current configured values are `memory=8GB`, `processors=4`, `swap=4GB`, `swapFile=E:\\CyberLab\\WSL\\wsl-swap.vhdx`, and `kernelCommandLine="sysctl.vm.max_map_count=262144"`.
+- Command `wsl -d Alpine -- sh -lc 'cat /etc/alpine-release; cat /proc/sys/vm/max_map_count'` returned Alpine `3.23.3` and `262144`. Previous lab notes reported Alpine `3.24.2`; this version discrepancy is unresolved. Do not reinstall or upgrade before confirming which VHDX is the intended existing distro.
+- `E:\\CyberLab\\Tools\\DockerDesktop\\Docker Desktop.exe` exists, and `E:\\CyberLab\\DockerData` contains `disk` and `main` directories.
+- On this PC, `Get-Command docker` returned no result and `docker` was not recognized. `wsl --list --verbose` listed Alpine only; Docker Desktop has not yet been confirmed running/registered on this host.
+- Do not assume the presence of Docker data folders proves the old images and volumes are usable. Start the existing Docker Desktop application and verify the effective disk-image location and containers before pulling images, changing data location, or initializing another backend.
+- Always close Docker Desktop, run `wsl --shutdown`, and wait for it to stop before physically disconnecting the portable drive. Never unplug E: while its WSL VHDX, swap VHDX, or Docker disk is in use.
+
+Next host-resume sequence:
+1. Ensure the portable drive is mounted as `E:`.
+2. Launch `E:\CyberLab\Tools\DockerDesktop\Docker Desktop.exe`.
+3. Wait for Docker Desktop to finish starting, then check `Get-Command docker`, `wsl --list --verbose`, and `docker info`.
+4. In Docker Desktop Settings, verify the WSL 2 backend and inspect the disk image location. Do not change the data location until the existing data is identified.
+5. From `E:\CyberLab\Projects\wazuh-docker\single-node`, inspect `docker compose ps -a`; do not run `down -v`.
+6. Recheck indexer health and endpoint integration; the earlier machine's green cluster result does not automatically prove current-host health.
 
 ## Working rules
 
@@ -14,7 +36,7 @@
 - Do not skip or compress a technically relevant phase only to conserve model usage.
 - Normal ChatGPT is the default; reserve Thinking mode for major design choices or difficult analysis if the user chooses to switch.
 - Use current official documentation for version-dependent commands.
-- Keep all lab artifacts on `D:\CyberLab` where practical; record exceptions for Windows-managed paths.
+- Keep all lab artifacts on `E:\CyberLab` where practical; record exceptions for Windows-managed paths.
 - This public repository must not contain passwords, tokens, private keys, raw unsanitized PCAPs, or sensitive system details.
 
 ## Architecture
@@ -23,7 +45,7 @@
 Windows analyst workstation
   ├─ PowerShell, Nmap, Wireshark
   ├─ Docker Desktop / WSL2 backend
-  └─ D:\CyberLab\PCAP, Evidence, Projects, Reports
+  └─ E:\CyberLab\PCAP, Evidence, Projects, Reports
          │
          ├─ Alpine Linux 3.24.2 on WSL2
          │    ├─ analyst user + doas
@@ -107,7 +129,7 @@ Windows analyst workstation
 
 ### Wazuh
 - Images: `wazuh/wazuh-indexer:4.14.8`, `wazuh/wazuh-manager:4.14.8`, `wazuh/wazuh-dashboard:4.14.8`.
-- Current compose folder: `D:\CyberLab\Projects\wazuh-docker\single-node`.
+- Current compose folder: `E:\CyberLab\Projects\wazuh-docker\single-node`.
 - Indexer cluster returned `green` at the last health check.
 - Dashboard login was confirmed by the user.
 - Initial indexer logs showed cluster event timeouts and slow cluster-state writes; follow-up showed a GC-overhead warning. Keep monitoring.
