@@ -13,7 +13,7 @@ This lab is now being used on a different Windows PC with the same portable driv
 - Internal `D:` drive is separate and had 55.5 GB free at the check. Do not redirect lab data to it.
 - Current PC: Intel Core i3 4th generation, 4 logical processors (reported 3.5 GHz), 16 GB RAM, NVIDIA Quadro P400 with 2 GB dedicated VRAM. GPU acceleration is not needed for Wazuh.
 - `.wslconfig` is host-specific and remains under `%USERPROFILE%\.wslconfig`; current configured values are `memory=8GB`, `processors=4`, `swap=4GB`, `swapFile=E:\\CyberLab\\WSL\\wsl-swap.vhdx`, and `kernelCommandLine="sysctl.vm.max_map_count=262144"`.
-- WSL registry inspection confirmed the currently registered `Alpine` distribution has `BasePath: D:\WSL\Alpine` and VHDX `D:\WSL\Alpine\ext4.vhdx`. This appears to be the older/local installation the user had installed previously; it reports Alpine `3.23.3` and `vm.max_map_count=262144`. A separate candidate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, but it is not the currently registered `Alpine` base path. Previous project setup recorded Alpine `3.24.2`. Compare both VHDX files' size/timestamps before deciding which to use. Do not unregister, overwrite, re-import, or upgrade either instance yet.
+- WSL registry inspection confirmed the currently registered `Alpine` distribution has `BasePath: D:\WSL\Alpine` and VHDX `D:\WSL\Alpine\ext4.vhdx`. This appears to be the older/local installation the user had installed previously; it reports Alpine `3.23.3` and `vm.max_map_count=262144`. A separate candidate VHDX exists at `E:\CyberLab\WSL\Alpine\ext4.vhdx`, but it is not the currently registered `Alpine` base path. Previous project setup recorded Alpine `3.24.2`. The VHDX sizes/timestamps have now been compared; see the dated comparison section. Do not unregister, overwrite, re-import, or upgrade either instance yet.
 - `E:\\CyberLab\\Tools\\DockerDesktop\\Docker Desktop.exe` exists, and `E:\\CyberLab\\DockerData` contains `disk` and `main` directories.
 - On this PC, `Get-Command docker` returned no result and `docker` was not recognized. `wsl --list --verbose` listed Alpine only; Docker Desktop has not yet been confirmed running/registered on this host.
 - Do not assume the presence of Docker data folders proves the old images and volumes are usable. Start the existing Docker Desktop application and verify the effective disk-image location and containers before pulling images, changing data location, or initializing another backend.
@@ -164,3 +164,15 @@ Windows analyst workstation
 7. Send a uniquely identifiable benign test event and prove it is searchable before building detections.
 
 See [Lab Operations](LAB_OPERATIONS.md) for start, verification, and stop commands.
+
+
+## Alpine VHDX comparison — 14 October 2026
+
+Observed PowerShell metadata:
+
+| Path | Size reported | Created | Last written | Interpretation |
+|---|---:|---|---|---|
+| `D:\WSL\Alpine\ext4.vhdx` | 11.59 GB | 28 Mar 2026 20:24:57 | 14 Oct 2026 21:08:40 | Strong candidate for the older long-used local Alpine installation. It is the distro currently registered as `Alpine`. |
+| `E:\CyberLab\WSL\Alpine\ext4.vhdx` | 0.10 GB | 4 Oct 2026 22:55:25 | 11 Oct 2026 02:15:58 | Strong candidate for the newer portable-drive project import. It is not currently registered under the `Alpine` name. Contents/version must be verified before relying on this inference. |
+
+Recommended next step: preserve both disks and register the E: candidate as a second distro named `AlpineLab` using WSL's documented `wsl --import-in-place` command. Then verify its Alpine version, user, `/etc/wsl.conf`, SSH, and syslog. Do not run `wsl --unregister Alpine`, and do not delete either VHDX.
