@@ -220,3 +220,24 @@ Recommended first design: keep the lab configuration and evidence portable, keep
 Never unplug E: while Docker/WSL is running. Stop the Compose services without deleting volumes, quit Docker Desktop, close WSL sessions, run `wsl --shutdown`, and wait for VHDX files to become idle before disconnecting.
 
 See [Portable SOC Lab Plan](PORTABILITY_PLAN.md) for the options, proposed layout, and staged implementation.
+
+
+## Verified Docker installation on this PC — 14 October 2026
+
+Docker Desktop is installed in per-user mode at `%LOCALAPPDATA%\Programs\DockerDesktop`. After temporarily adding `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin` to this PowerShell process's `PATH`, Docker CLI `29.8.2`, Compose `v5.5.1`, and `docker info` all responded successfully. The active context is `desktop-linux`; server reports four CPUs and 7.758 GiB memory.
+
+The active backend currently lists **zero containers and zero images**. This is not the Wazuh stack previously documented on the old host. Before rebuilding, inspect the Compose files and the existing `E:\CyberLab\DockerData\disk` and `main` directories. Do not delete or manually move these directories.
+
+The PATH addition is temporary. To persist it for the current Windows user, use the guarded command below, then close and reopen PowerShell:
+
+```powershell
+$dockerBin = Join-Path $env:LOCALAPPDATA 'Programs\DockerDesktop\resources\bin'
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$entries = @($userPath -split ';' | Where-Object { $_ })
+
+if (-not ($entries | Where-Object { $_.TrimEnd('\') -ieq $dockerBin.TrimEnd('\') })) {
+    [Environment]::SetEnvironmentVariable('Path', (($entries + $dockerBin) -join ';'), 'User')
+}
+```
+
+Then verify `docker --version`, `docker compose version`, and `docker info` in a newly opened PowerShell window. This modifies only the current user's PATH; it does not relocate Docker storage. Docker Desktop's default WSL data location is normally under `%LOCALAPPDATA%\Docker\wsl`, but verify **Settings → Resources → Advanced** before inferring where this host's backing disk actually resides. See [Docker's official WSL backend and data location documentation](https://docs.docker.com/desktop/features/wsl/).
