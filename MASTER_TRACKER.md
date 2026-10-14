@@ -236,3 +236,8 @@ Observed file lengths:
 - The E: file is a recovery candidate, not yet verified as healthy or as containing the old Wazuh stack.
 
 Next check: get free space on C: and confirm the two data disk paths still exist. Do not click Browse/Apply, move VHDX files, or replace files while Docker is running. Follow Docker's official backup/restore process, which requires Docker Desktop fully stopped before backing up/restoring the WSL 2 `docker_data.vhdx`.
+
+
+## Pre-recovery backup prerequisite — 14 October 2026
+
+Latest user-observed figures: C: has 18.79 GB free; E: has more than 400 GB free from the earlier drive check. The old portable Docker data disk is 45.15 GB by file length, so do not copy it to C:. Before changing Docker's disk-image setting, make a separate offline backup on E: of the whole `E:\CyberLab\DockerData` directory (including both `disk\docker_data.vhdx` and `main\ext4.vhdx`). Quit Docker Desktop and run `wsl --shutdown` first, wait for Docker/WSL processes to exit, then copy the folder to `E:\CyberLab\Backups\DockerData-pre-recovery-20261014`. Verify source and backup file lengths before any restoration attempt. Docker's official instructions require Docker Desktop to be fully stopped before backing up its WSL data disk. Do not move, overwrite, mount, or select the existing E: disk in the UI before this backup exists.
