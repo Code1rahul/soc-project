@@ -335,3 +335,17 @@ User ran `docker compose config --format json` and reported host ports without `
 - Manager: `127.0.0.1:2514:1514/tcp`, `127.0.0.1:2515:1515/tcp`, `127.0.0.1:514:514/udp`, `127.0.0.1:55000:55000/tcp`
 
 This is the initial local-only posture; it may not allow the Alpine WSL2 distro to connect via the Windows host's NAT-facing IP. When adding endpoint telemetry, expose only the required manager/ingestion port to the WSL virtual network with a narrow firewall/bind strategy. Do not make dashboard or indexer public for endpoint ingestion.
+
+
+## Wazuh redeployment verified; Alpine access blocked — 15 October 2026
+
+User-provided output confirms:
+- `docker compose ps`: `wazuh.indexer`, `wazuh.manager`, and `wazuh.dashboard` for version 4.14.8 are all `Up`.
+- Dashboard login succeeded and browser API calls return 200. Recent indexer logs show index creation/mapping activity.
+- All six published host ports are explicitly loopback-only: dashboard 127.0.0.1:443, indexer 127.0.0.1:9200, manager TCP 2514→1514 and 2515→1515, UDP 514→514, TCP 55000→55000.
+- Dashboard logs include an SSL `certificate unknown` alert during a client connection. This needs review if persistent; it has not prevented the reported browser login.
+- Manager config currently has `<remote><connection>secure</connection><port>1514</port><protocol>tcp</protocol>`; that is the Wazuh agent protocol, not a syslog receiver. There is no observed `connection=syslog` block yet. Port mapping 514 alone does not enable syslog ingestion.
+- Starting `AlpineLab` fails: `Failed to attach disk 'E:\CyberLab\WSL\Alpine\ext4.vhdx' to WSL2: Access is denied`, `Wsl/Service/CreateInstance/MountDisk/HCS/E_ACCESSDENIED`. Cause is not established; this is a WSL mount/permission failure, not proof of VHDX corruption.
+- Critical next step is a small read-only check: `wsl --version`, `wsl -l -v`, file ACL/attributes for the E: Alpine VHDX, and test whether the same distro starts after closing Docker Desktop and `wsl --shutdown` (only if a controlled Docker downtime is acceptable). Do not alter ACLs, unregister distro, or delete/replace VHDX before diagnosing.
+
+Next milestone: resolve Alpine's WSL disk attach, then configure a Wazuh syslog receiver on UDP/514 with an explicit allowed IP, open only that specific ingest port for the WSL host path, and prove a uniquely marked benign event appears in Wazuh. Dashboard/indexer stay loopback-only. Official Wazuh syslog guide: https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/syslog.html
