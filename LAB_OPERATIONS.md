@@ -77,3 +77,12 @@ Avoid `docker compose down -v`; it removes named volumes. If the external lab dr
 - [Docker Compose CLI](https://docs.docker.com/reference/cli/docker/compose/)
 - [Wazuh Docker deployment](https://documentation.wazuh.com/current/deployment-options/docker/index.html)
 - [Wazuh Syslog collection](https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/syslog.html)
+
+
+## Current next phase: prove Alpine-to-Wazuh event delivery
+
+The Alpine endpoint now starts and returns its expected version and logs after the ownership fix. Stop troubleshooting Docker storage; it is out of scope unless a new container health failure appears.
+
+Before changing the syslog route, obtain the current Alpine gateway/interface address and identify the matching Windows WSL virtual-interface IP. Configure the Manager explicitly for remote syslog with the documented protocol and a narrow sender allowlist. The Manager's existing `connection=secure` listener on TCP/1514 is for Wazuh agents, not a generic syslog listener. All published ports currently bind to loopback, so only the specific required ingestion path may be changed; keep Dashboard and Indexer loopback-only.
+
+The test is complete only when a uniquely marked harmless event generated from Alpine can be found in Wazuh. Do not claim endpoint monitoring before that result exists.
