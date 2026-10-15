@@ -257,3 +257,18 @@ This verifies successful copy exit status and matching reported file lengths; no
 The current Docker Desktop disk-image location was confirmed in Settings as `C:\Users\R123\AppData\Local\Docker\wsl`. Do not choose `E:\CyberLab\DockerData` as a destination that could overwrite the older disk. If moving the current clean Docker data location to E:, choose a **new empty folder**, such as `E:\CyberLab\DockerDesktop-Active`, then inspect the resulting folder tree before any restore attempt. Current C: free space was 18.79 GB, so do not copy the 45.15 GB virtual disk to C:.
 
 Official recovery reference: [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/). Docker says to fully stop Docker Desktop before copying/restoring the WSL data disk and, after reinstalling, restore `docker_data.vhdx` to the configured disk's corresponding location. Follow a reversible staged procedure; do not overwrite the active disk before preserving it.
+
+
+## Docker data location successfully moved to E: — 15 October 2026
+
+User verified the Docker engine still responds after changing Docker Desktop's disk image location to `E:\CyberLab\DockerDesktop-Active`. The new directory contains:
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\disk\docker_data.vhdx` — reported file length 1.53 GB.
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\main\ext4.vhdx` — reported file length 0.09 GB.
+
+`docker info` returns a healthy Server section (Docker Engine 29.8.2; 4 CPUs; 7.758 GiB); `docker ps -a`, `docker image ls` remain empty. This is strong evidence that the currently active clean backend now stores its VHDX files on E:. The line `Docker Root Dir: /var/lib/docker` is the Linux-internal data path, not the Windows storage location.
+
+The previous Docker data disk remains preserved at `E:\CyberLab\DockerData\disk\docker_data.vhdx` (45.15 GB) and copied to `E:\CyberLab\Backups\DockerData-pre-recovery-20261014\disk\docker_data.vhdx`. Both source and backup sizes match; SHA-256 comparison has not yet been performed. The companion `main\ext4.vhdx` is also backed up. Do not overwrite or delete either old copy.
+
+Next cautious recovery step: follow Docker's documented WSL backup/restore pattern to replace the **active empty backend's** `DockerDesktopWSL\disk\docker_data.vhdx` only after stopping Docker Desktop and WSL and creating a rollback copy of the current active disk. Restore from the backed-up old disk, never from the only original. Leave the active `main\ext4.vhdx` in place initially; stop if Docker reports a startup or migration failure. Then verify container/image list, Compose services, and Wazuh health. If data disk migration fails, restore the active-disk rollback copy, with original and backup remaining intact.
+
+Official reference: [Docker Desktop data backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/).
