@@ -339,3 +339,12 @@ Docker Compose documents that omitting the host IP binds to all interfaces (`0.0
 - "127.0.0.1:55000:55000/tcp"
 ```
 After editing, validate with `docker compose config --quiet` and re-run the redacted port-table inspection before pulling or starting services. Internal container-to-container traffic remains on the Compose network. These loopback bindings are for initial local validation only; they may prevent the Alpine WSL distribution from connecting over the Windows host's NAT-facing IP. When we implement endpoint telemetry, expose only the necessary manager input port to the WSL virtual network. Keep dashboard and indexer host ports loopback-only.
+
+
+## Wazuh up; endpoint integration pending — 15 October 2026
+
+Confirmed by user output: all three Wazuh 4.14.8 containers are Up and the dashboard login works. Dashboard and indexer are bound to loopback; the manager's mapped ports are also loopback-only. Recent dashboard log shows browser API 200 responses; a certificate-unknown TLS alert was also logged and should be revisited only if it persists or affects operations.
+
+The current manager `<remote>` is configured with `connection=secure`, TCP/1514, which is for Wazuh agent communication. A published UDP/514 port alone is not a syslog listener. To use the planned Alpine syslog route, explicitly add a `connection=syslog` manager remote block with the intended protocol and a narrow `allowed-ips` entry, after the endpoint address is verified, then restart only the manager service and validate its logs.
+
+Endpoint blocker: `wsl -d AlpineLab -u root -- ...` fails to attach `E:\CyberLab\WSL\Alpine\ext4.vhdx` with `Wsl/Service/CreateInstance/MountDisk/HCS/E_ACCESSDENIED`. Root cause is not yet confirmed. Keep WSL VHDX and Docker storage files intact; inspect WSL version/listing and ACL/attributes in read-only mode before making permissions changes. When bringing the endpoint back, keep dashboard/indexer local-only and make only the minimal syslog ingress path reachable from WSL.
