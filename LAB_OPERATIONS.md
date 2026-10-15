@@ -263,3 +263,14 @@ Robocopy copied both files from `E:\CyberLab\DockerData` to `E:\CyberLab\Backups
 Docker Desktop currently uses `C:\Users\R123\AppData\Local\Docker\wsl`; C: had 18.79 GB free. The E: disk is likely the previous environment but its contents have not yet been validated. Do not set the UI location to the existing `E:\CyberLab\DockerData` folder because that could collide with the old disk. If relocating the current empty Docker backend to E:, use a separate **new empty destination** such as `E:\CyberLab\DockerDesktop-Active`, verify the move, and only then design the restore step for the old data disk. No restore or replacement has been attempted yet.
 
 Official guidance: [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/). Fully stop Docker Desktop before direct disk backup/restore.
+
+
+## Active Docker storage now on E: — 15 October 2026
+
+The user selected `E:\CyberLab\DockerDesktop-Active` in Docker Desktop. Docker remains responsive, and file inspection found:
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\disk\docker_data.vhdx` — 1.53 GB by reported length.
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\main\ext4.vhdx` — 0.09 GB by reported length.
+
+The active engine still shows zero images/containers, expected for the clean backend. The old data disk at `E:\CyberLab\DockerData\disk\docker_data.vhdx` remains 45.15 GB and has a verified size-matched copy under `E:\CyberLab\Backups\DockerData-pre-recovery-20261014`; no hash test was done.
+
+To recover previous image/container state, do not repoint the UI at `E:\CyberLab\DockerData` and do not overwrite the only old disk. Follow the Docker backup/restore guidance. Before restoring, stop Docker Desktop, run `wsl --shutdown`, and create a rollback copy of the new active data disk. Replace only the active `DockerDesktopWSL\disk\docker_data.vhdx` from the **backup copy** of the previous `docker_data.vhdx`, leave the current active `main\ext4.vhdx` in place for the initial attempt, then start Docker Desktop and check whether the old containers/images are visible. If it fails, stop and restore the active rollback disk; retain both original copies.
