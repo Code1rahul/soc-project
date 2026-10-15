@@ -13,7 +13,7 @@
 - [x] A copy of the previous Docker data was preserved before recovery attempts.
 - [x] Current Docker service state was restored after an unsuccessful attempt to reuse the prior data disk.
 - [x] Alpine 3.24.2 and the `analyst` account were verified after the lab endpoint was registered under the name `AlpineLab`.
-- [ ] `AlpineLab` currently fails to start with WSL `E_ACCESSDENIED`; cause is not confirmed.
+- [x] `AlpineLab` returned the expected version and log output after a targeted Windows ownership/access correction; no further permission changes are planned unless the error recurs.
 - [ ] Confirm current Indexer cluster health after this deployment.
 - [ ] Configure a genuine Wazuh syslog receiver; publishing a UDP port alone does not configure a listener.
 - [ ] Prove endpoint event ingestion using a unique harmless test marker.
