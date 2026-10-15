@@ -301,3 +301,12 @@ To restore a working Docker installation:
 5. Launch Docker Desktop and verify the engine.
 
 If Docker starts, recreate Wazuh from the validated Compose project and pulled version-pinned images after inspecting the Compose file and security-sensitive config. Prior old images/containers/volumes are not confirmed recovered. Never use Factory Reset or delete the 45.15 GB disk.
+
+
+## Docker rollback confirmed — 15 October 2026
+
+The user reports that `docker info` is healthy on Docker Desktop 29.8.2 after restoring the clean data disk. `docker ps -a` and `docker image ls` both show empty output. Docker's active data path stays at `E:\CyberLab\DockerDesktop-Active`.
+
+The direct restore of the old 45.15 GB Docker data disk failed due to Docker Desktop's WSL disk-ID mismatch. Do not repeat the manual VHDX replacement. Original and backup disks remain untouched. The Wazuh Compose project still exists under `E:\CyberLab\Projects\wazuh-docker\single-node`.
+
+Next: validate the Compose file/config/cert files; inspect `docker compose config --images`; pull image versions pinned by the Compose file and launch with `docker compose up -d` only after validating the configuration. This creates a clean Wazuh runtime, not recovered historical Docker state. Do not use `docker compose down -v`.
