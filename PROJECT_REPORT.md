@@ -45,3 +45,12 @@ A normal SSH session capture was inspected. Network and TCP metadata were visibl
 ## Publication hygiene
 
 Only publish sanitized configuration excerpts and redacted screenshots. Do not publish credentials, private keys, raw packet captures, personal identifiers, or machine-specific storage information.
+
+
+## End-of-day status — 15 October 2026
+
+The deployment was brought up from the validated Compose project after the old Docker state failed to attach to the current runtime. The three Wazuh 4.14.8 services are running, dashboard login succeeds, and the UI/Indexer host ports are loopback-only.
+
+The AlpineLab WSL endpoint subsequently started after a targeted Windows file-owner correction. Its version and local logs were accessible, but endpoint event ingestion into Wazuh has not yet been proven. The next session should resume with health validation, explicit remote syslog configuration and a harmless uniquely marked event. Detection development follows only after the test event is searchable.
+
+The session shutdown sequence is: stop Compose services, quit Docker Desktop, run `wsl --shutdown`, and check that WSL distributions are stopped. Do not use volume-deleting cleanup commands.
