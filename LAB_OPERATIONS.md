@@ -317,3 +317,25 @@ Next: validate the Compose file/config/cert files; inspect `docker compose confi
 User's current Compose directory passes `docker compose config --quiet`. Services are indexer, manager, dashboard; all image tags are pinned to `4.14.8`. The local `config` tree contains service configuration and TLS private keys.
 
 Before `docker compose pull` / `up -d`, inspect effective host published ports. Do not print or paste full `docker compose config` because it may contain interpolated sensitive values; pipe its JSON output to PowerShell and display only image names and host/target port bindings. Prefer loopback host IP `127.0.0.1` for dashboard/indexer if local-only access is the intent. Keep certificates/private keys out of Git and screenshots.
+
+
+## Secure host port bindings before first start
+
+The current Compose configuration published every host port without an explicit host IP:
+- dashboard: host 443 → container 5601/TCP
+- indexer: 9200 → 9200/TCP
+- manager: 2514 → 1514/TCP, 2515 → 1515/TCP, 514 → 514/UDP, 55000 → 55000/TCP
+
+Docker Compose documents that omitting the host IP binds to all interfaces (`0.0.0.0`). For initial local-only testing, edit each service's `ports:` list to use an explicit loopback mapping:
+```yaml
+# dashboard
+- "127.0.0.1:443:5601/tcp"
+# indexer
+- "127.0.0.1:9200:9200/tcp"
+# manager
+- "127.0.0.1:2514:1514/tcp"
+- "127.0.0.1:2515:1515/tcp"
+- "127.0.0.1:514:514/udp"
+- "127.0.0.1:55000:55000/tcp"
+```
+After editing, validate with `docker compose config --quiet` and re-run the redacted port-table inspection before pulling or starting services. Internal container-to-container traffic remains on the Compose network. These loopback bindings are for initial local validation only; they may prevent the Alpine WSL distribution from connecting over the Windows host's NAT-facing IP. When we implement endpoint telemetry, expose only the necessary manager input port to the WSL virtual network. Keep dashboard and indexer host ports loopback-only.
