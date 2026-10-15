@@ -8,7 +8,7 @@ This guide covers starting and verifying the current Wazuh Compose project while
 - Wazuh Manager, Indexer, and Dashboard 4.14.8 are running.
 - Dashboard login works.
 - Dashboard and Indexer are bound to local access.
-- The Alpine WSL endpoint registered as `AlpineLab` currently fails to start with WSL `E_ACCESSDENIED`; do not alter its permissions or unregister it before the cause is understood.
+- The Alpine WSL endpoint registered as `AlpineLab` subsequently returned expected version and log output after a targeted Windows ownership/access correction. Do not make further permissions changes unless the failure recurs.
 - Endpoint event ingestion is not yet verified. The Manager's TCP/1514 secure-agent listener is not the same thing as a remote syslog receiver.
 
 ## Start Wazuh
