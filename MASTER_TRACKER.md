@@ -90,3 +90,28 @@ Next single phase:
 5. Only then work on a controlled SSH-failure detection.
 
 No local disk paths/sizes are recorded here. Do not make further Docker storage changes.
+
+
+## End-of-day handover — 15 October 2026
+
+### Verified today
+- Docker Engine is healthy and all three Wazuh 4.14.8 services were reported Up.
+- Dashboard login succeeded.
+- Dashboard and Indexer are published on loopback only.
+- AlpineLab starts after a targeted Windows file-ownership correction and reports Alpine 3.24.2; SSH and BusyBox syslog processes are present.
+- Alpine interface and default route were inspected. Local logs are readable.
+- The Wazuh Manager configuration still uses its secure Wazuh-agent listener; a distinct generic syslog receiver has not yet been configured.
+- Alpine-to-Wazuh ingestion remains unproven.
+
+### Shutdown for today
+User was instructed to stop the Compose services with `docker compose stop`, quit Docker Desktop through the system tray, then run `wsl --shutdown` and verify distributions are stopped. Shutdown confirmation is pending.
+
+### Next session — fixed sequence
+1. Start Docker Desktop and verify `docker info`.
+2. Start the existing Wazuh stack and check container status and Indexer health.
+3. Confirm AlpineLab starts and recheck its route (do not make further ownership changes unless the error returns).
+4. Make one planned configuration change: add a Wazuh-supported UDP syslog receiver with an explicit narrow sender allowlist, and configure only the needed ingestion path from Alpine. Preserve Dashboard/Indexer loopback access.
+5. Send one unique benign marker and search for it in Wazuh.
+6. After ingestion is proven, generate controlled failed SSH attempts and build/validate the alert and incident timeline.
+
+No more storage changes are planned. Do not use `docker compose down -v` or repeat the previous Docker disk replacement attempt.
