@@ -323,3 +323,15 @@ User ran the following from `E:\CyberLab\Projects\wazuh-docker\single-node`:
 - Config directory contains service configs and a TLS cert/key set, including private keys.
 
 These checks establish that Compose syntax is valid and expected config files exist; they do not establish that existing credentials/certificates are valid or that events are ingested. Treat the config directory as private because it contains private keys. Before starting the stack, inspect effective published host port bindings, ideally binding dashboard/indexer to loopback unless remote access is intentionally required. Then pull the pinned image versions and start services only after reviewing the bind addresses.
+
+
+## Wazuh port-bind review — 15 October 2026
+
+User ran `docker compose config --format json` and reported host ports without `host_ip`, i.e. published on all host interfaces: dashboard 443→5601/tcp, indexer 9200→9200/tcp, manager 2514→1514/tcp, 2515→1515/tcp, 514→514/udp, and 55000→55000/tcp. Docker Compose docs state an omitted host IP binds to `0.0.0.0`, and Docker warns that this can bypass expected host firewall assumptions. See [Docker Compose port publishing](https://docs.docker.com/reference/compose-file/services/#ports) and [Wazuh Docker deployment ports](https://documentation.wazuh.com/current/deployment-options/docker/wazuh-container.html).
+
+**Next safe deployment posture:** explicitly bind all current host-published Wazuh ports to `127.0.0.1` while validating initial local dashboard/indexer health. Example short syntax:
+- Dashboard: `127.0.0.1:443:5601/tcp`
+- Indexer: `127.0.0.1:9200:9200/tcp`
+- Manager: `127.0.0.1:2514:1514/tcp`, `127.0.0.1:2515:1515/tcp`, `127.0.0.1:514:514/udp`, `127.0.0.1:55000:55000/tcp`
+
+This is the initial local-only posture; it may not allow the Alpine WSL2 distro to connect via the Windows host's NAT-facing IP. When adding endpoint telemetry, expose only the required manager/ingestion port to the WSL virtual network with a narrow firewall/bind strategy. Do not make dashboard or indexer public for endpoint ingestion.
