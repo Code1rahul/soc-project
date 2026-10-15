@@ -303,3 +303,12 @@ The 45.15 GB previous Docker data disk was placed at the currently active Docker
 **Recovery: restore the clean 1.53 GB disk to the active filename.** Ensure Docker Desktop is quit and `wsl --shutdown` has completed. Rename the failed 45.15 GB active file to a non-active filename, then rename `docker_data.clean-before-restore-20261015.vhdx` back to `docker_data.vhdx`. Keep the 45.15 GB attempted restore, original source, original backup, and 1.53 GB rollback copy intact. Start Docker and verify the engine. Do not repeat direct VHDX replacement for the old data disk.
 
 Old Wazuh recovery remains unresolved. Prefer recreating the Wazuh environment from the preserved Compose/config files and pulling pinned images, unless a supported conversion/restore method is validated. Container volumes and old Docker state inside the failed VHDX are not confirmed recovered.
+
+
+## Docker rollback verified healthy — 15 October 2026
+
+User ran `docker info`, `docker ps -a`, and `docker image ls` after restoring the clean disk. Docker Server responds on version 29.8.2; 4 CPUs and 7.758 GiB memory. Containers and images remain at zero. This verifies Docker Desktop is healthy again after rollback, but the previous Wazuh containers/images/volumes did not return.
+
+Current configured storage remains `E:\CyberLab\DockerDesktop-Active`. The old 45.15 GB disk and its backup remain preserved on E:, alongside the failed-restore file and clean-disk backups. Do not retry direct disk replacement or delete these files.
+
+Next safe path: validate existing Compose configuration and mounts, confirm pinned image versions, then pull/recreate Wazuh containers as a clean deployment. This will not recover old data/volumes. Inspect the existing config directory and avoid deleting files or using `docker compose down -v`. Re-prove indexer health and telemetry ingestion afterward.
