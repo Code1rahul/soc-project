@@ -294,3 +294,12 @@ User output confirms the active configured data path now contains:
 The separate attempt to invoke `E:\CyberLab\Scripts\restore-old-docker-disk.ps1` failed because no script file existed at that path; this does not undo the already visible file arrangement. Do not rerun or recreate the restore step.
 
 Next: start Docker Desktop normally and inspect `docker info`, `docker ps -a`, `docker image ls`, and `docker volume ls`. Startup and actual container/image recovery are **not yet validated**. If Docker fails to start, quit/stop Docker and send the exact error; do not Factory Reset, delete the 45 GB disk, or change the data location again. Keep both original source and backup copies untouched.
+
+
+## Recovery correction — older VHDX failed to start on 15 October 2026
+
+The 45.15 GB previous Docker data disk was placed at the currently active Docker Desktop path. Docker then failed to bootstrap with `DockerDesktop/Wsl/ExecError`, specifically that no `/sys/block/sd*` device matched the active data disk ID `32d25913-dc40-454e-8d44-ef700957fa14`. The log also says `/opt/docker-desktop/componentsVersion.json` is missing. The exact disk-ID mismatch is strong evidence that swapping only the VHDX file is incompatible with this newer Docker Desktop provisioning metadata.
+
+**Recovery: restore the clean 1.53 GB disk to the active filename.** Ensure Docker Desktop is quit and `wsl --shutdown` has completed. Rename the failed 45.15 GB active file to a non-active filename, then rename `docker_data.clean-before-restore-20261015.vhdx` back to `docker_data.vhdx`. Keep the 45.15 GB attempted restore, original source, original backup, and 1.53 GB rollback copy intact. Start Docker and verify the engine. Do not repeat direct VHDX replacement for the old data disk.
+
+Old Wazuh recovery remains unresolved. Prefer recreating the Wazuh environment from the preserved Compose/config files and pulling pinned images, unless a supported conversion/restore method is validated. Container volumes and old Docker state inside the failed VHDX are not confirmed recovered.
