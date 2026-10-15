@@ -1,59 +1,43 @@
 # SOC Home Lab — Wazuh, Alpine WSL2, SSH Investigation
 
-A hands-on home lab for learning SOC workflows: collecting authentication telemetry, validating network exposure, investigating suspicious login patterns, and building detections with Wazuh.
+A hands-on SOC learning project focused on authentication telemetry, network exposure validation, security monitoring, alert triage, investigation timelines, and detection engineering.
 
-> **Scope:** This is a self-owned lab for authorized testing only. It is a learning environment, not a production deployment.
+> **Scope:** This is a self-owned learning environment for authorized testing. It is not a production deployment.
 
 ## Current status
 
-- Alpine Linux 3.24.2 runs as an imported WSL2 distribution.
-- OpenSSH and BusyBox syslog are configured on Alpine.
-- Windows-to-Alpine SSH connectivity was verified.
-- A controlled sequence of failed SSH authentications followed by a successful login was recorded in Alpine logs.
-- Nmap confirmed SSH as the only open TCP service in the default scan performed.
-- A normal SSH packet capture was inspected. It showed network/session metadata, while SSH's encrypted payload did not reveal interactive commands.
-- Wazuh 4.14.8 single-node Docker stack is running.
-- Wazuh Indexer cluster health returned `green`; the dashboard was opened successfully.
-- **Alpine/Wazuh event ingestion is not yet proven.** The dashboard previously showed no registered agents. Visible alert counts must not be interpreted as evidence that Alpine telemetry has arrived.
+- Wazuh Manager, Indexer, and Dashboard version 4.14.8 are running.
+- Dashboard login and browser API requests have been verified.
+- Dashboard and Indexer are restricted to local access for the current validation phase.
+- The separate Alpine WSL endpoint is registered as `AlpineLab`, but currently fails to start with a WSL disk-access error. Root cause is not confirmed.
+- The endpoint's log ingestion into Wazuh is **not yet proven**.
+- A controlled sequence of failed SSH authentications followed by a successful login was previously observed in the lab logs.
+- Nmap established a service baseline, and a normal SSH packet capture was inspected. Encrypted SSH payload did not expose interactive commands.
 
 ## Project principles
 
-- Validate current state before installing or changing components.
-- Every meaningful step explains both **what we do** and **why**.
-- Keep useful technical phases; do not skip them solely to conserve model usage.
-- Preserve evidence and record both successes and failures.
-- Keep lab data under `E:\CyberLab` where supported.
-- Never commit credentials, API tokens, private keys, unsanitized PCAP files, or sensitive host logs.
+- Validate current state before changing components.
+- Prefer one planned change at a time and verify its result.
+- Preserve recovery options; do not reset a working component to fix an unrelated issue.
+- Record verified outcomes and explicitly mark unverified assumptions.
+- Keep configuration secrets, private keys, credentials, unsanitized PCAPs, personal details, and machine-specific storage information out of public project documentation.
 
 ## Documentation
 
-- [Master Tracker](MASTER_TRACKER.md) — current state, checklist, issues, and handover.
-- [Project Report](PROJECT_REPORT.md) — outcomes, evidence, and lessons learned.
-- [Lab Operations](LAB_OPERATIONS.md) — how to start, verify, and stop the lab safely.
-- [Portable SOC Lab Plan](PORTABILITY_PLAN.md) — portable-drive architecture, host dependencies, and safe implementation roadmap.
+- [Master Tracker](MASTER_TRACKER.md) — verified status, milestones, and blockers.
+- [Project Report](PROJECT_REPORT.md) — evidence, findings, and lessons learned.
+- [Lab Operations](LAB_OPERATIONS.md) — start, verify, and stop the services.
+- [Portable Lab Plan](PORTABILITY_PLAN.md) — portable workflow and recovery principles.
 
-## Planned milestones
+## Next milestones
 
-1. Validate stable Wazuh operation and review exposed host ports.
-2. Select a supported telemetry path from Alpine to Wazuh.
-3. Prove ingestion with a harmless test event.
-4. Build a detection for repeated failed SSH authentication.
-5. Correlate network and endpoint evidence into an investigation timeline.
-6. Publish a sanitized technical walkthrough.
+1. Resolve the Alpine WSL startup failure without destructive changes.
+2. Configure the Wazuh Manager to receive syslog from the approved lab endpoint.
+3. Prove ingestion with a harmless uniquely marked event.
+4. Generate controlled failed SSH authentications and validate detection.
+5. Build a timestamped investigation timeline with evidence and limitations.
+6. Publish a sanitized technical walkthrough and learning summary.
 
 ## Security and privacy
 
-The Wazuh dashboard and indexer should remain private to the lab host. Review Docker port bindings before using the lab on shared networks. Use non-default credentials and never publish secrets. Do not expose SSH or vulnerable test services to the public internet.
-
-## Versioning
-
-This repository contains the public, sanitized project documentation. The live environment and evidence files remain on the lab machine unless deliberately sanitized and added for publication.
-
-## Current system / portability
-
-The project is currently being used on a different Windows PC with the same portable drive mounted as `E:`. Keep lab paths under `E:\CyberLab` where supported. The internal `D:` drive is not the lab drive. See [Master Tracker](MASTER_TRACKER.md) and [Lab Operations](LAB_OPERATIONS.md) for the current-host handover. Do not unplug the portable drive while WSL/Docker are running.
-
-
-## Portability goal
-
-The lab is being organized as a portable kit under `E:\CyberLab`, not as a single container or a drive-wide Docker disk. The Compose recipe, validated Alpine WSL VHDX, sanitized evidence, scripts, and backups should travel with the external drive. Each Windows PC still needs a working WSL 2/Docker runtime. Unrelated personal files on the drive must remain untouched. See [Portable SOC Lab Plan](PORTABILITY_PLAN.md).
+Keep the dashboard and Indexer local-only during development. Open only the minimum necessary ingestion path when endpoint networking is validated. Never publish credentials, private keys, personal identifiers, raw captures, or machine-specific storage details.
