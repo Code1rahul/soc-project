@@ -37,7 +37,7 @@ Host-specific WSL settings are not automatically portable. Validate each host's 
 ## Current blockers
 
 - Wazuh services are running, but end-to-end endpoint ingestion is not proven.
-- The Alpine WSL endpoint currently fails to start due to a WSL disk-access error. The cause is not yet confirmed.
+- The Alpine WSL endpoint subsequently returned expected version and log output after a targeted Windows ownership/access correction. Event delivery to Wazuh is still unproven.
 - The previous Docker data was not attached successfully to the current runtime; a clean deployment from the existing Compose project is now running. The preserved prior-data archive should remain untouched unless a supported recovery path is established.
 
 ## Safe handling
