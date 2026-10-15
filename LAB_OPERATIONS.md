@@ -287,3 +287,17 @@ Observed file layout after user's operation:
 The command invocation of `E:\CyberLab\Scripts\restore-old-docker-disk.ps1` then reported the file did not exist. The displayed sizes nevertheless show that the file replacement had already been performed; do not rerun the restore block.
 
 Now start Docker Desktop normally and check whether it successfully starts and the old images/containers/volumes return. If it fails, stop and report the exact startup error before doing anything else. Do not use Factory Reset, do not delete the old 45 GB disk, and do not overwrite the preserved 1.53 GB disk.
+
+
+## Critical recovery note — direct replacement failed (15 October 2026)
+
+Replacing the active `docker_data.vhdx` with the previous 45.15 GB VHDX caused Docker Desktop's WSL bootstrap to fail. Error: no block device matched data-disk ID `32d25913-dc40-454e-8d44-ef700957fa14`, and `/opt/docker-desktop/componentsVersion.json` was missing. This suggests the current Docker Desktop provisioning metadata expects a disk identity that the old VHDX does not have. Do **not** attempt the direct replacement a second time.
+
+To restore a working Docker installation:
+1. Quit Docker Desktop and run `wsl --shutdown`; verify Docker processes have exited.
+2. Rename the current 45.15 GB active file to `docker_data.failed-restore-20261015.vhdx`.
+3. Rename `docker_data.clean-before-restore-20261015.vhdx` back to `docker_data.vhdx`.
+4. Keep the pre-restore copy and every original/backup of the old VHDX intact.
+5. Launch Docker Desktop and verify the engine.
+
+If Docker starts, recreate Wazuh from the validated Compose project and pulled version-pinned images after inspecting the Compose file and security-sensitive config. Prior old images/containers/volumes are not confirmed recovered. Never use Factory Reset or delete the 45.15 GB disk.
