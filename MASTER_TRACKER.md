@@ -312,3 +312,14 @@ User ran `docker info`, `docker ps -a`, and `docker image ls` after restoring th
 Current configured storage remains `E:\CyberLab\DockerDesktop-Active`. The old 45.15 GB disk and its backup remain preserved on E:, alongside the failed-restore file and clean-disk backups. Do not retry direct disk replacement or delete these files.
 
 Next safe path: validate existing Compose configuration and mounts, confirm pinned image versions, then pull/recreate Wazuh containers as a clean deployment. This will not recover old data/volumes. Inspect the existing config directory and avoid deleting files or using `docker compose down -v`. Re-prove indexer health and telemetry ingestion afterward.
+
+
+## Clean Wazuh redeployment preflight — 15 October 2026
+
+User ran the following from `E:\CyberLab\Projects\wazuh-docker\single-node`:
+- `docker compose config --quiet` succeeded.
+- Services: `wazuh.indexer`, `wazuh.manager`, `wazuh.dashboard`.
+- Pinned images: `wazuh/wazuh-manager:4.14.8`, `wazuh/wazuh-indexer:4.14.8`, `wazuh/wazuh-dashboard:4.14.8`.
+- Config directory contains service configs and a TLS cert/key set, including private keys.
+
+These checks establish that Compose syntax is valid and expected config files exist; they do not establish that existing credentials/certificates are valid or that events are ingested. Treat the config directory as private because it contains private keys. Before starting the stack, inspect effective published host port bindings, ideally binding dashboard/indexer to loopback unless remote access is intentionally required. Then pull the pinned image versions and start services only after reviewing the bind addresses.
