@@ -281,3 +281,16 @@ User confirmed the current clean backend disk and rollback copy have matching re
 - Rollback copy: `E:\CyberLab\Backups\DockerDesktop-Active-before-restore-20261015\docker_data.vhdx`
 
 Old Docker data source and backup remain preserved. Source disk restoration has **not** occurred yet. The proposed restore procedure follows Docker's documented WSL 2 backup/restore pattern: Docker Desktop fully stopped, restore the saved `docker_data.vhdx` to the configured data location, then verify the backend. Preserve the existing active disk under a distinct filename and leave active `main\ext4.vhdx` untouched initially. Do not start Compose services until listing the restored containers/images/volumes. If Docker fails to start, stop and restore the pre-restore rollback copy.
+
+
+## Older Docker data disk placed in active location — awaiting startup test, 15 October 2026
+
+User output confirms the active configured data path now contains:
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\disk\docker_data.vhdx` — 45.15 GB (restored from the backup of the former drive's disk).
+- `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\disk\docker_data.clean-before-restore-20261015.vhdx` — 1.53 GB (pre-restore clean active disk preserved).
+- Rollback copy of the clean disk remains `E:\CyberLab\Backups\DockerDesktop-Active-before-restore-20261015\docker_data.vhdx` — 1.53 GB.
+- Original old disk remains `E:\CyberLab\DockerData\disk\docker_data.vhdx` and backup remains `E:\CyberLab\Backups\DockerData-pre-recovery-20261014\disk\docker_data.vhdx`, both 45.15 GB.
+
+The separate attempt to invoke `E:\CyberLab\Scripts\restore-old-docker-disk.ps1` failed because no script file existed at that path; this does not undo the already visible file arrangement. Do not rerun or recreate the restore step.
+
+Next: start Docker Desktop normally and inspect `docker info`, `docker ps -a`, `docker image ls`, and `docker volume ls`. Startup and actual container/image recovery are **not yet validated**. If Docker fails to start, quit/stop Docker and send the exact error; do not Factory Reset, delete the 45 GB disk, or change the data location again. Keep both original source and backup copies untouched.
