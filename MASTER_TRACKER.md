@@ -272,3 +272,12 @@ The previous Docker data disk remains preserved at `E:\CyberLab\DockerData\disk\
 Next cautious recovery step: follow Docker's documented WSL backup/restore pattern to replace the **active empty backend's** `DockerDesktopWSL\disk\docker_data.vhdx` only after stopping Docker Desktop and WSL and creating a rollback copy of the current active disk. Restore from the backed-up old disk, never from the only original. Leave the active `main\ext4.vhdx` in place initially; stop if Docker reports a startup or migration failure. Then verify container/image list, Compose services, and Wazuh health. If data disk migration fails, restore the active-disk rollback copy, with original and backup remaining intact.
 
 Official reference: [Docker Desktop data backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/).
+
+
+## Active Docker rollback disk copy created — 15 October 2026
+
+User confirmed the current clean backend disk and rollback copy have matching reported length (1.53 GB):
+- Active before restore: `E:\CyberLab\DockerDesktop-Active\DockerDesktopWSL\disk\docker_data.vhdx`
+- Rollback copy: `E:\CyberLab\Backups\DockerDesktop-Active-before-restore-20261015\docker_data.vhdx`
+
+Old Docker data source and backup remain preserved. Source disk restoration has **not** occurred yet. The proposed restore procedure follows Docker's documented WSL 2 backup/restore pattern: Docker Desktop fully stopped, restore the saved `docker_data.vhdx` to the configured data location, then verify the backend. Preserve the existing active disk under a distinct filename and leave active `main\ext4.vhdx` untouched initially. Do not start Compose services until listing the restored containers/images/volumes. If Docker fails to start, stop and restore the pre-restore rollback copy.
