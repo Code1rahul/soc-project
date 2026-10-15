@@ -86,3 +86,26 @@ The Alpine endpoint now starts and returns its expected version and logs after t
 Before changing the syslog route, obtain the current Alpine gateway/interface address and identify the matching Windows WSL virtual-interface IP. Configure the Manager explicitly for remote syslog with the documented protocol and a narrow sender allowlist. The Manager's existing `connection=secure` listener on TCP/1514 is for Wazuh agents, not a generic syslog listener. All published ports currently bind to loopback, so only the specific required ingestion path may be changed; keep Dashboard and Indexer loopback-only.
 
 The test is complete only when a uniquely marked harmless event generated from Alpine can be found in Wazuh. Do not claim endpoint monitoring before that result exists.
+
+
+## End-of-day operational handover — 15 October 2026
+
+Wazuh 4.14.8 Manager, Indexer, and Dashboard were reported Up; dashboard login works. Dashboard and Indexer are loopback-bound. AlpineLab starts and its authentication logs are readable after a targeted Windows file-ownership correction.
+
+**Still not complete:** Alpine-to-Wazuh event ingestion. The Manager has the secure agent listener on TCP/1514, but remote syslog has not yet been configured explicitly.
+
+### Close for the day
+1. In the Compose project directory, run `docker compose stop` and confirm the services stop with `docker compose ps`.
+2. Quit Docker Desktop from the system tray.
+3. Run `wsl --shutdown` and confirm the distributions are stopped with `wsl --list --verbose`.
+4. Do not disconnect the external drive until Docker/WSL are stopped.
+
+### Resume tomorrow
+1. Start Docker Desktop; confirm `docker info` responds.
+2. Start Wazuh via `docker compose up -d`; verify service states, Indexer health, and dashboard access.
+3. Start/check AlpineLab and its route.
+4. Configure the Wazuh documented remote syslog receiver and narrow sender allowlist. Make only UDP syslog ingestion reachable from the endpoint; keep Dashboard and Indexer local-only.
+5. Send a uniquely marked harmless test event and prove it searchable.
+6. Move to controlled SSH failure detection only after event ingestion is confirmed.
+
+Do not revisit storage relocation or attempt direct Docker data-disk replacement. Do not run `docker compose down -v`.
