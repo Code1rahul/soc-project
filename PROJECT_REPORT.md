@@ -8,7 +8,7 @@ Build a reproducible SOC practice environment to collect authentication telemetr
 
 Wazuh Manager, Indexer, and Dashboard 4.14.8 are running. The dashboard login succeeds. The Compose configuration is valid, and the dashboard and indexer are currently bound to local access only.
 
-The lab endpoint is an Alpine WSL2 distribution registered as `AlpineLab`. Earlier checks verified Alpine 3.24.2, user `analyst`, SSH, and local syslog configuration. The latest attempt to start it fails with WSL `E_ACCESSDENIED`; the cause has not been determined. Therefore, current endpoint-to-Wazuh event ingestion is not proven.
+The lab endpoint is an Alpine WSL2 distribution registered as `AlpineLab`. Earlier checks verified Alpine 3.24.2, user `analyst`, SSH, and local syslog configuration. An earlier attempt to start it failed with WSL `E_ACCESSDENIED`. The user subsequently confirmed that the expected Alpine version and log output returned after a targeted Windows ownership/access correction. The root cause is not definitively established. Endpoint-to-Wazuh event ingestion remains unproven.
 
 The previous Docker data could not be attached successfully to the current Docker Desktop setup. The existing Compose project was used to deploy a clean Wazuh stack. A prior-data copy remains preserved separately; don't assume its containers, images, or volumes have been recovered.
 
