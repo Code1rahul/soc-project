@@ -9,7 +9,7 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 - Wazuh Manager, Indexer, and Dashboard version 4.14.8 are running.
 - Dashboard login and browser API requests have been verified.
 - Dashboard and Indexer are restricted to local access for the current validation phase.
-- The separate Alpine WSL endpoint is registered as `AlpineLab`, but currently fails to start with a WSL disk-access error. Root cause is not confirmed.
+- The Alpine WSL endpoint (`AlpineLab`) has returned the expected version and log output after a targeted Windows ownership/access correction. End-to-end event ingestion is still pending.
 - The endpoint's log ingestion into Wazuh is **not yet proven**.
 - A controlled sequence of failed SSH authentications followed by a successful login was previously observed in the lab logs.
 - Nmap established a service baseline, and a normal SSH packet capture was inspected. Encrypted SSH payload did not expose interactive commands.
