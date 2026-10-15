@@ -76,3 +76,17 @@ The WSL distribution name used for the project endpoint is `AlpineLab`. Earlier 
 - [Wazuh: Docker deployment](https://documentation.wazuh.com/current/deployment-options/docker/index.html)
 - [Wazuh: Syslog collection](https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/syslog.html)
 - [Microsoft: WSL command reference](https://learn.microsoft.com/windows/wsl/reference)
+
+
+## Endpoint resumed; syslog integration next — 15 October 2026
+
+User confirmed the Alpine endpoint command now returns the expected results after the targeted ownership fix, so the prior WSL access-denied blocker appears resolved. The next phase is event transport and proof of ingestion, not more Docker recovery. The Wazuh Manager currently has a secure agent listener on TCP/1514; a remote syslog receiver has not yet been verified/configured. Published ports are loopback-only, so endpoint reachability must be designed deliberately before sending events.
+
+Next single phase:
+1. Read the current Alpine route/interface and check the matching Windows WSL virtual IP.
+2. Configure Wazuh Manager's documented syslog receiver with a narrow sender allowlist.
+3. Make only the required ingestion port reachable from Alpine; keep Dashboard/Indexer local-only.
+4. Send a harmless unique test marker and search for it in Wazuh.
+5. Only then work on a controlled SSH-failure detection.
+
+No local disk paths/sizes are recorded here. Do not make further Docker storage changes.
