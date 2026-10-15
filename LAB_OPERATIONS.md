@@ -274,3 +274,16 @@ The user selected `E:\CyberLab\DockerDesktop-Active` in Docker Desktop. Docker r
 The active engine still shows zero images/containers, expected for the clean backend. The old data disk at `E:\CyberLab\DockerData\disk\docker_data.vhdx` remains 45.15 GB and has a verified size-matched copy under `E:\CyberLab\Backups\DockerData-pre-recovery-20261014`; no hash test was done.
 
 To recover previous image/container state, do not repoint the UI at `E:\CyberLab\DockerData` and do not overwrite the only old disk. Follow the Docker backup/restore guidance. Before restoring, stop Docker Desktop, run `wsl --shutdown`, and create a rollback copy of the new active data disk. Replace only the active `DockerDesktopWSL\disk\docker_data.vhdx` from the **backup copy** of the previous `docker_data.vhdx`, leave the current active `main\ext4.vhdx` in place for the initial attempt, then start Docker Desktop and check whether the old containers/images are visible. If it fails, stop and restore the active rollback disk; retain both original copies.
+
+
+## Restored disk placed; startup validation pending — 15 October 2026
+
+Observed file layout after user's operation:
+- Active `DockerDesktopWSL\disk\docker_data.vhdx`: 45.15 GB.
+- Preserved clean active disk `docker_data.clean-before-restore-20261015.vhdx`: 1.53 GB.
+- Clean active disk rollback copy: 1.53 GB.
+- Original old source and separate old-disk backup: 45.15 GB each.
+
+The command invocation of `E:\CyberLab\Scripts\restore-old-docker-disk.ps1` then reported the file did not exist. The displayed sizes nevertheless show that the file replacement had already been performed; do not rerun the restore block.
+
+Now start Docker Desktop normally and check whether it successfully starts and the old images/containers/volumes return. If it fails, stop and report the exact startup error before doing anything else. Do not use Factory Reset, do not delete the old 45 GB disk, and do not overwrite the preserved 1.53 GB disk.
