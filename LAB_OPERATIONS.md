@@ -310,3 +310,10 @@ The user reports that `docker info` is healthy on Docker Desktop 29.8.2 after re
 The direct restore of the old 45.15 GB Docker data disk failed due to Docker Desktop's WSL disk-ID mismatch. Do not repeat the manual VHDX replacement. Original and backup disks remain untouched. The Wazuh Compose project still exists under `E:\CyberLab\Projects\wazuh-docker\single-node`.
 
 Next: validate the Compose file/config/cert files; inspect `docker compose config --images`; pull image versions pinned by the Compose file and launch with `docker compose up -d` only after validating the configuration. This creates a clean Wazuh runtime, not recovered historical Docker state. Do not use `docker compose down -v`.
+
+
+## Clean Wazuh deployment preflight — 15 October 2026
+
+User's current Compose directory passes `docker compose config --quiet`. Services are indexer, manager, dashboard; all image tags are pinned to `4.14.8`. The local `config` tree contains service configuration and TLS private keys.
+
+Before `docker compose pull` / `up -d`, inspect effective host published ports. Do not print or paste full `docker compose config` because it may contain interpolated sensitive values; pipe its JSON output to PowerShell and display only image names and host/target port bindings. Prefer loopback host IP `127.0.0.1` for dashboard/indexer if local-only access is the intent. Keep certificates/private keys out of Git and screenshots.
