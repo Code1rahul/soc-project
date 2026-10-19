@@ -109,3 +109,10 @@ Wazuh 4.14.8 Manager, Indexer, and Dashboard were reported Up; dashboard login w
 6. Move to controlled SSH failure detection only after event ingestion is confirmed.
 
 Do not revisit storage relocation or attempt direct Docker data-disk replacement. Do not run `docker compose down -v`.
+
+
+## Syslog verification checkpoint — 19 October 2026
+
+The latest logs confirm `wazuh-remoted` accepts syslog configuration, has allowed sender entries for the lab endpoint/network gateway, and reports listening on UDP/514. Alpine BusyBox `syslogd` runs with remote forwarding enabled. A unique event was written to Alpine's local log but not found in Wazuh alert/archive files during the test.
+
+This no-match is not yet conclusive: archive logging may be disabled and alert files contain only rule-triggered events. Read the current `<logall_json>` setting; if disabled, temporarily enable archive JSON logging, send a fresh marker, confirm receipt in `archives.json`, and disable it again to avoid unbounded raw-log storage. Keep the event labelled as synthetic. Don't state endpoint ingestion is working until there is a clear receiver-side match.
