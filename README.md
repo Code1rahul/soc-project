@@ -10,7 +10,7 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 - Dashboard login and browser API requests have been verified.
 - Dashboard and Indexer are restricted to local access for the current validation phase.
 - The Alpine WSL endpoint (`AlpineLab`) has returned the expected version and log output after a targeted Windows ownership/access correction. End-to-end event ingestion is still pending.
-- The endpoint's log ingestion into Wazuh is **not yet proven**.
+- Wazuh's UDP syslog receiver is configured and running, but end-to-end event ingestion is **not yet proven**.
 - A controlled sequence of failed SSH authentications followed by a successful login was previously observed in the lab logs.
 - Nmap established a service baseline, and a normal SSH packet capture was inspected. Encrypted SSH payload did not expose interactive commands.
 
@@ -31,10 +31,10 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 
 ## Next milestones
 
-1. Resolve the Alpine WSL startup failure without destructive changes.
-2. Configure the Wazuh Manager to receive syslog from the approved lab endpoint.
-3. Prove ingestion with a harmless uniquely marked event.
-4. Generate controlled failed SSH authentications and validate detection.
+1. Recheck Wazuh and AlpineLab health at session start.
+2. Run a bounded archive-logging test to prove the configured syslog path.
+3. Restore the original archive setting and confirm the test event was received.
+4. Generate controlled failed SSH authentications and validate detection after ingestion succeeds.
 5. Build a timestamped investigation timeline with evidence and limitations.
 6. Publish a sanitized technical walkthrough and learning summary.
 
