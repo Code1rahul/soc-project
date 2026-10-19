@@ -127,3 +127,34 @@ Latest user-provided command output confirms:
 - The earlier no-match check is inconclusive for transport because Wazuh archive logging may be disabled; events that don't trigger an alert won't appear in alert files.
 
 Next: inspect `logall_json` in the mounted Manager configuration. If disabled, enable it temporarily to prove receipt in `archives.json`, send a fresh unique marker, verify arrival, and turn archive logging off again to avoid long-term disk growth. Do not declare end-to-end ingestion complete until the marker is visible at the Manager. Then check rule match / alert pipeline and verify searchable indexing separately.
+
+
+## End-of-session handover — 19 October 2026
+
+### Verified today
+- Docker Engine is responding; all three Wazuh 4.14.8 services were observed running.
+- Indexer cluster health returned `green`, with one node, 29 active primary shards, zero unassigned shards, and no pending tasks.
+- Dashboard login succeeded earlier in the session.
+- The project endpoint is registered as `AlpineLab`; Alpine returned its expected version and local logs. SSH and BusyBox syslog are running.
+- Wazuh Manager now accepts the explicit remote syslog configuration and its logs report listening on UDP/514. The dashboard and indexer remain local-only.
+- A unique synthetic test message was confirmed in Alpine's local log, but the marker was not found in Wazuh alert/archive files.
+- The Manager config shows `logall=no` and `logall_json=no`. Therefore, the lack of an archive match is inconclusive; archive logging was disabled when the test was performed.
+- The first receiver-config attempt had an invalid combined allowlist value; it was corrected to separate XML entries. Current `wazuh-remoted` remains running and there are no recent configuration errors in the last check.
+- The temporary ingestion test script was prepared for the next step; it has not yet been confirmed run.
+
+### Shutdown sequence
+1. From the Compose project, run `docker compose stop` and verify container status.
+2. Quit Docker Desktop from the system tray.
+3. Run `wsl --shutdown` and `wsl --list --verbose` to confirm distributions are stopped.
+4. Leave the portable lab media connected until Docker and WSL are fully stopped.
+5. Do not use `docker compose down -v`, Factory Reset, or any storage cleanup.
+
+### Next session — fixed plan
+1. Start Docker Desktop; check `docker info`, start the existing Compose stack, and validate Indexer health.
+2. Start/check `AlpineLab`; verify SSH and syslog processes if needed.
+3. Run the prepared temporary archive-ingestion test once. It should back up the Manager config, enable JSON archive logging only for the test, send a new unique marker, search for it, and restore `logall_json=no`. Confirm the original setting was restored after the test even if it fails.
+4. If the marker appears in the Manager's `archives.json`, receipt at the Manager is proven; then verify whether the event triggers a rule and whether it becomes searchable in the Dashboard.
+5. If there is no match, do not change several variables at once. Check UDP transport and receiver logs with a bounded diagnostic.
+6. Only after ingestion works, run controlled real failed SSH attempts and validate the detection/incident timeline.
+
+No more Docker storage changes are planned. No machine-specific storage paths or virtual-disk sizes are recorded in this handover.
