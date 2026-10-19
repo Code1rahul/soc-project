@@ -115,3 +115,15 @@ User was instructed to stop the Compose services with `docker compose stop`, qui
 6. After ingestion is proven, generate controlled failed SSH attempts and build/validate the alert and incident timeline.
 
 No more storage changes are planned. Do not use `docker compose down -v` or repeat the previous Docker disk replacement attempt.
+
+
+## Syslog receiver active; event proof pending — 19 October 2026
+
+Latest user-provided command output confirms:
+- Alpine BusyBox syslogd is running with remote forwarding enabled (`-R` and `-L`).
+- The Wazuh Manager configuration inside the container has a `connection=syslog` block on UDP/514.
+- Wazuh logs report allowed senders for the endpoint and Docker network gateway, and `wazuh-remoted` listening on 514/UDP.
+- A uniquely marked test was confirmed in Alpine's local log, but wasn't found in Wazuh alert/archive files at that time.
+- The earlier no-match check is inconclusive for transport because Wazuh archive logging may be disabled; events that don't trigger an alert won't appear in alert files.
+
+Next: inspect `logall_json` in the mounted Manager configuration. If disabled, enable it temporarily to prove receipt in `archives.json`, send a fresh unique marker, verify arrival, and turn archive logging off again to avoid long-term disk growth. Do not declare end-to-end ingestion complete until the marker is visible at the Manager. Then check rule match / alert pipeline and verify searchable indexing separately.
