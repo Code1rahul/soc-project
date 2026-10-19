@@ -54,3 +54,19 @@ The deployment was brought up from the validated Compose project after the old D
 The AlpineLab WSL endpoint subsequently started after a targeted Windows file-owner correction. Its version and local logs were accessible, but endpoint event ingestion into Wazuh has not yet been proven. The next session should resume with health validation, explicit remote syslog configuration and a harmless uniquely marked event. Detection development follows only after the test event is searchable.
 
 The session shutdown sequence is: stop Compose services, quit Docker Desktop, run `wsl --shutdown`, and check that WSL distributions are stopped. Do not use volume-deleting cleanup commands.
+
+
+## End-of-day checkpoint — 19 October 2026
+
+### Confirmed
+- Wazuh Manager, Indexer, and Dashboard 4.14.8 run; dashboard login succeeded.
+- Indexer cluster health returned green with a single node, 29 active primary shards, and zero unassigned shards.
+- AlpineLab started and reported local authentication/syslog output; SSH and BusyBox syslog were running.
+- Wazuh Manager accepted a remote syslog receiver configuration and reported listening on UDP/514.
+- Dashboard and Indexer remain bound to local access.
+
+### Not yet confirmed
+A unique synthetic event was written to the Alpine local log, but no matching record was found in Wazuh alert/archive files. Raw JSON archive logging was disabled during that test, so no archive match alone does not prove transport failure. The prepared temporary archive-ingestion test has not yet been confirmed executed.
+
+### Next evidence milestone
+Temporarily enable Wazuh JSON archive logging for one controlled test; send a newly marked synthetic syslog event; search for it in the Manager archive; restore the original archive setting and verify restoration. If received, verify indexing and rule behavior. Then generate controlled failed SSH attempts, confirm a detection, and create a timestamped incident timeline. Clearly distinguish synthetic test events from genuine authentication failures.
