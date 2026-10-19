@@ -116,3 +116,35 @@ Do not revisit storage relocation or attempt direct Docker data-disk replacement
 The latest logs confirm `wazuh-remoted` accepts syslog configuration, has allowed sender entries for the lab endpoint/network gateway, and reports listening on UDP/514. Alpine BusyBox `syslogd` runs with remote forwarding enabled. A unique event was written to Alpine's local log but not found in Wazuh alert/archive files during the test.
 
 This no-match is not yet conclusive: archive logging may be disabled and alert files contain only rule-triggered events. Read the current `<logall_json>` setting; if disabled, temporarily enable archive JSON logging, send a fresh marker, confirm receipt in `archives.json`, and disable it again to avoid unbounded raw-log storage. Keep the event labelled as synthetic. Don't state endpoint ingestion is working until there is a clear receiver-side match.
+
+
+## End-of-day handover — 19 October 2026
+
+Docker Engine and all three Wazuh 4.14.8 services were observed running. The Indexer cluster returned green with 29 active primary shards and zero unassigned shards. Dashboard login worked. The Alpine endpoint is currently startable; SSH and BusyBox syslog processes were seen running.
+
+The Manager configuration now includes a remote syslog receiver on UDP/514. The Manager logs report the receiver started and accepted the configured sender entries. Dashboard and Indexer remain loopback-only.
+
+**End-to-end event ingestion is not yet proven.** A unique synthetic message appeared in Alpine's local log but did not appear in Wazuh alert/archive files. Both `logall` and `logall_json` were set to `no`, so archive absence is inconclusive. The temporary test script was generated but has not yet been confirmed run.
+
+### Close the lab
+```powershell
+# From the existing Wazuh Compose project directory
+docker compose stop
+docker compose ps
+```
+Then quit Docker Desktop from the system tray and run:
+```powershell
+wsl --shutdown
+wsl --list --verbose
+```
+Do not disconnect the portable lab media until Docker and WSL have stopped. Do not use `docker compose down -v`.
+
+### Resume next session
+1. Start Docker Desktop, verify `docker info`, start the existing Compose stack, and recheck Indexer health.
+2. Confirm `AlpineLab` starts.
+3. Run the prepared bounded ingestion test once: temporarily enable JSON archive logging, send one unique synthetic marker, check `archives.json`, and restore `logall_json=no`.
+4. Explicitly verify configuration restoration, even if the marker is not received.
+5. If receipt is proven, test the dashboard/indexing path and then move to controlled failed SSH detection. If not, isolate UDP transport before making other changes.
+6. Update the project report only when each milestone has supporting evidence.
+
+Do not make further storage changes or publish machine-specific storage paths and sizes.
