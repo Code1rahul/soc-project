@@ -37,16 +37,18 @@
 
 The Wazuh Compose project defines three services, all pinned to version 4.14.8. The configuration validates and all three containers were observed running. A fresh deployment is in use; the prior Docker containers, images, and volumes were not recovered into the current engine.
 
-All currently published host ports are bound to loopback:
-- Dashboard: host 443 to container 5601/TCP.
-- Indexer: host 9200 to container 9200/TCP.
-- Manager: host 2514 to container 1514/TCP; host 2515 to container 1515/TCP; UDP 514 and TCP 55000 are also currently loopback-bound.
+Published access is intentionally scoped:
+- Dashboard: host 127.0.0.1:443 to container 5601/TCP.
+- Indexer: host 127.0.0.1:9200 to container 9200/TCP.
+- Manager secure-agent ports: host 127.0.0.1:2514 and 127.0.0.1:2515 to the corresponding container TCP ports.
+- Manager API: host 127.0.0.1:55000 to container TCP/55000.
+- Manager syslog: UDP/514 is published on the current WSL gateway address only, not on all host interfaces.
 
 The Manager has a Wazuh remote syslog receiver on UDP/514. Normal Alpine syslog events were successfully relayed through a foreground Windows PowerShell process listening on the WSL gateway at UDP/15144 and forwarding to the published Manager UDP/514 endpoint. The direct Alpine-to-Docker-published UDP/514 path remains unreliable/unproven, while the relay path generated a confirmed rule 5710 alert. The relay and Alpine syslog target are currently runtime/manual settings, not yet made persistent. Keep Dashboard and Indexer local-only; do not widen the Manager listener beyond the WSL gateway.
 
 ### Alpine endpoint
 
-The WSL distribution name used for the project endpoint is `AlpineLab`. Earlier verification reported Alpine 3.24.2 and user `analyst`. The latest startup attempt failed with `Wsl/Service/CreateInstance/MountDisk/HCS/E_ACCESSDENIED`. This error alone does not establish that the filesystem is corrupt. Do not unregister the distro, alter ACLs, or replace its filesystem image before the cause is investigated.
+The project endpoint distribution is `AlpineLab`; earlier verification reported Alpine 3.24.2 and user `analyst`. A past WSL `E_ACCESSDENIED` startup problem stopped occurring after a targeted Windows ownership/access correction. During the 22 October session the endpoint started, logged locally, and generated a Wazuh alert through the relay path. Do not repeat permission changes or filesystem recovery unless the startup error recurs.
 
 ### Existing evidence
 
@@ -56,15 +58,15 @@ The WSL distribution name used for the project endpoint is `AlpineLab`. Earlier 
 - A normal SSH packet capture was inspected; TCP metadata was visible, while the encrypted payload did not expose interactive commands.
 - Directly replacing the active Docker data disk with the previous disk failed during Docker Desktop provisioning. The old data copy remains archived; the attempt is not considered a successful recovery. Do not repeat manual data-disk replacement.
 
-## Execution plan — fixed order
+## Execution plan — current fixed order (22 October 2026)
 
-1. **Resolve Alpine startup:** inspect WSL/Windows security or attachment causes using read-only checks. Change only a demonstrated cause.
-2. **Validate Wazuh health:** inspect service status, Manager logs, and Indexer cluster health.
-3. **Configure syslog receiver:** use Wazuh's documented `connection=syslog` configuration, protocol/port, and a narrow `allowed-ips` value.
-4. **Network minimally:** keep Dashboard and Indexer local-only; make only the chosen ingestion port reachable from the lab endpoint.
-5. **Prove event ingestion:** send a uniquely marked benign event; find it in Wazuh and capture evidence.
-6. **Build SSH detection:** run controlled failures, verify alert criteria and false-positive limitations.
-7. **Publish:** add only redacted evidence and sanitized documentation.
+1. **Persist Alpine forwarding:** locate the Alpine startup configuration and change the syslog target from direct UDP/514 to the WSL-gateway relay listener on UDP/15144. Preserve dynamic gateway discovery.
+2. **Make the relay restart-safe:** define a user-scoped Windows startup task that launches only after WSL and Docker are available; retain gateway-only binding, dynamic Alpine IP discovery, and operational logs.
+3. **Validate persistence:** after the configuration changes are made, perform one planned restart-recovery check and confirm a normal syslog marker becomes an alert with `logall_json=no`.
+4. **Verify search/UI:** confirm the alert is searchable in the Indexer/Dashboard and recheck Indexer cluster health after the recent container restarts.
+5. **Build SSH detection:** simulate repeated failed SSH authentication, validate rule/correlation behavior and false-positive limitations, and distinguish synthetic events from actual login attempts.
+6. **Investigate and report:** build a timestamped incident timeline, sanitized evidence package, and short detection rationale.
+7. **Document portability limits:** record that the direct Alpine-to-published-UDP path remains unresolved and that the current relay is a workaround, not proof of a Docker/WSL root cause.
 
 ## Working and safety rules
 
