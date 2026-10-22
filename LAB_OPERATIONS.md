@@ -9,7 +9,8 @@ This guide covers starting and verifying the current Wazuh Compose project while
 - Dashboard login works.
 - Dashboard and Indexer are bound to local access.
 - The Alpine WSL endpoint registered as `AlpineLab` subsequently returned expected version and log output after a targeted Windows ownership/access correction. Do not make further permissions changes unless the failure recurs.
-- Endpoint event ingestion is not yet verified. The Manager's TCP/1514 secure-agent listener is not the same thing as a remote syslog receiver.
+- Alpine-to-Wazuh ingestion is verified through a temporary foreground Windows relay: Alpine syslogd sends to the WSL gateway on UDP/15144; the relay forwards to the Manager's published UDP/514 endpoint. The normal syslog marker generated rule 5710, level 5. The relay and Alpine syslog destination are still runtime-only and have not yet been made persistent.
+- The Manager's TCP/1514 secure-agent listener is distinct from the remote syslog receiver on UDP/514.
 
 ## Start Wazuh
 
@@ -51,7 +52,9 @@ The intended endpoint distribution is `AlpineLab`. Its prior known configuration
 
 A Docker port mapping alone does not configure a Wazuh syslog receiver. Wazuh Manager must be configured explicitly for remote syslog with the correct protocol, port, and a narrow sender allowlist. Keep the Dashboard and Indexer local-only. After the intended sender address and network route are verified, expose only the ingestion port needed for the lab test.
 
-Then send one uniquely marked, harmless test message and prove it is searchable in Wazuh before claiming collection works.
+The current validated workaround uses a foreground Windows relay. Start the relay script in a dedicated PowerShell session, confirm it binds only to the WSL gateway on UDP/15144, and confirm Alpine syslogd targets that listener. Do not close the relay window during a practical session. The current runtime setup has not yet been made restart-persistent. Do not enable raw JSON archiving for routine operation; the intended setting is `logall_json=no`.
+
+The normal syslog marker was confirmed in the Manager's `alerts.json` under rule 5710, level 5. The next work is to make Alpine's relay destination persistent, define reliable relay startup after WSL/Docker networking is ready, verify the same alert in the Dashboard/Indexer, and test recovery after a controlled WSL restart.
 
 ## Stop safely
 
@@ -148,3 +151,14 @@ Do not disconnect the portable lab media until Docker and WSL have stopped. Do n
 6. Update the project report only when each milestone has supporting evidence.
 
 Do not make further storage changes or publish machine-specific storage paths and sizes.
+
+
+## Syslog relay checkpoint — 22 October 2026
+
+- Verified path: Alpine `logger` → BusyBox `syslogd` forwarding to the WSL gateway on UDP/15144 → foreground Windows relay → published Manager UDP/514 → rule 5710 alert.
+- The relay only binds to the discovered WSL gateway and accepts traffic from the current AlpineLab address; it records forwarding/error status without logging every event payload.
+- Relay window must remain open until automatic startup is implemented and validated.
+- The running Alpine syslogd process was redirected at runtime. The Alpine startup configuration has not yet been updated, so a distro restart may revert its target.
+- Manager configuration is restored with `logall_json=no`; allowlist contains Alpine's current address and the Docker gateway. Confirm current network addresses before any future network changes.
+
+Do not change storage settings, broaden the UDP bind to all interfaces, or expose Dashboard/Indexer beyond loopback.
