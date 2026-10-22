@@ -1,6 +1,6 @@
 # Master Tracker — SOC Home Lab
 
-**Updated:** 15 October 2026  
+**Updated:** 22 October 2026  
 **Project:** Wazuh + Alpine WSL2 + SSH event investigation
 
 ## Verified status
@@ -14,9 +14,12 @@
 - [x] Current Docker service state was restored after an unsuccessful attempt to reuse the prior data disk.
 - [x] Alpine 3.24.2 and the `analyst` account were verified after the lab endpoint was registered under the name `AlpineLab`.
 - [x] `AlpineLab` returned the expected version and log output after a targeted Windows ownership/access correction; no further permission changes are planned unless the error recurs.
-- [ ] Confirm current Indexer cluster health after this deployment.
-- [ ] Configure a genuine Wazuh syslog receiver; publishing a UDP port alone does not configure a listener.
-- [ ] Prove endpoint event ingestion using a unique harmless test marker.
+- [ ] Confirm current Indexer cluster health after the latest service restarts.
+- [x] Configure the Wazuh Manager remote syslog receiver on UDP/514 with a narrow allowlist.
+- [x] Prove normal Alpine syslog ingestion through the temporary Windows relay: marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` generated Wazuh rule 5710, level 5.
+- [ ] Make the Windows relay persistent and restart-safe; it is currently a foreground PowerShell process.
+- [ ] Update Alpine's startup configuration to forward to the relay on UDP/15144; the running syslogd process was changed at runtime, but persistence is not yet confirmed.
+- [ ] Verify the alert is searchable in the Indexer/Dashboard.
 - [ ] Build and validate a detection for repeated failed SSH authentication.
 - [ ] Create a timestamped incident timeline and sanitized evidence package.
 
@@ -39,7 +42,7 @@ All currently published host ports are bound to loopback:
 - Indexer: host 9200 to container 9200/TCP.
 - Manager: host 2514 to container 1514/TCP; host 2515 to container 1515/TCP; UDP 514 and TCP 55000 are also currently loopback-bound.
 
-The Manager configuration currently shows its standard secure agent listener on TCP/1514. It does not yet have a verified remote syslog listener. Before endpoint ingestion, configure the Wazuh-supported syslog receiver with a narrow sender allowlist, and then make only the required ingestion path reachable from the endpoint.
+The Manager has a Wazuh remote syslog receiver on UDP/514. Normal Alpine syslog events were successfully relayed through a foreground Windows PowerShell process listening on the WSL gateway at UDP/15144 and forwarding to the published Manager UDP/514 endpoint. The direct Alpine-to-Docker-published UDP/514 path remains unreliable/unproven, while the relay path generated a confirmed rule 5710 alert. The relay and Alpine syslog target are currently runtime/manual settings, not yet made persistent. Keep Dashboard and Indexer local-only; do not widen the Manager listener beyond the WSL gateway.
 
 ### Alpine endpoint
 
@@ -158,3 +161,26 @@ Next: inspect `logall_json` in the mounted Manager configuration. If disabled, e
 6. Only after ingestion works, run controlled real failed SSH attempts and validate the detection/incident timeline.
 
 No more Docker storage changes are planned. No machine-specific storage paths or virtual-disk sizes are recorded in this handover.
+
+
+## Current execution checkpoint — 22 October 2026
+
+### Verified in the practical session
+- Wazuh Manager, Indexer, and Dashboard 4.14.8 were running after startup; Indexer health has not yet been rechecked after the most recent restarts.
+- The Manager's original syslog configuration was restored after temporary tests: `logall_json=no`; the original allowlist contains `172.25.95.140` and `172.18.0.1`. Temporary test sender entries were removed.
+- A temporary internal Docker-network test sender produced an exact match in `archives.json` while JSON archiving was temporarily enabled; configuration hash restoration was verified.
+- A Windows UDP listener received a test datagram from AlpineLab at `172.25.95.140`.
+- A Windows-generated UDP message to the published Manager endpoint was observed in the Manager network namespace as `172.18.0.1 -> 172.18.0.4:514`.
+- A foreground Windows relay listened on the WSL gateway at UDP/15144, accepted a datagram from the current AlpineLab IP, and forwarded it to the published UDP/514 endpoint.
+- Alpine's running BusyBox syslogd process was changed at runtime to forward to `<current WSL gateway>:15144`. A message sent via Alpine `logger` appeared in its local log, the relay reported forwarding the datagram, and the exact marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` appeared in `alerts.json` under rule 5710, level 5.
+- The verified workaround is the relay path. The precise cause of the direct Alpine-to-Docker-published-port failure is not yet identified.
+
+### Pending — fixed order
+1. Update the Alpine startup configuration so syslogd uses the relay destination port UDP/15144 after a distro restart.
+2. Define relay startup order and create a user-scoped scheduled task only after verifying the script's behavior across WSL/network address changes and Docker startup.
+3. Verify the same alert is searchable in the Indexer/Dashboard while `logall_json=no`.
+4. Recheck Indexer health and validate relay recovery after a controlled WSL restart.
+5. Develop repeated-failed-SSH detection, an investigation timeline, and a sanitized evidence package.
+6. Update the project report/evidence after each milestone is actually verified.
+
+No Docker storage changes, firewall rule changes, broad port bindings, or GitHub file changes were made by the diagnostic tests. Do not publish machine-specific storage paths or sizes.
