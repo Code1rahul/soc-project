@@ -28,14 +28,14 @@ A default Nmap TCP scan found SSH as the only open TCP service in that scan. Thi
 
 A normal SSH session capture was inspected. Network and TCP metadata were visible, while commands inside the SSH session remained encrypted. Endpoint logs are needed to investigate post-login activity.
 
-## Detection and investigation milestones still pending
+## Remaining detection and investigation milestones
 
-1. Restore reliable access to the Alpine WSL endpoint.
-2. Configure a valid Wazuh remote syslog receiver and an appropriately scoped sender allowlist.
-3. Prove collection by searching for a unique benign test event.
-4. Generate controlled failed SSH authentication and confirm a corresponding event/alert.
-5. Correlate authentication records, endpoint evidence, and network metadata.
-6. Build an incident timeline and document severity, response recommendations, false positives, and limitations.
+1. Make Alpine's relay destination persistent in its startup configuration.
+2. Configure reliable Windows relay startup after WSL and Docker are ready; ensure the gateway and Alpine source address are rediscovered safely.
+3. Verify a normal alert is searchable in the Indexer/Dashboard with `logall_json=no` and recheck Indexer health.
+4. Run a planned restart-recovery check and confirm ingestion resumes.
+5. Simulate repeated failed SSH authentication and validate detection/correlation behavior.
+6. Correlate authentication evidence, source context, the alert, and timeline; document response recommendations, false positives, and limitations.
 
 ## Lessons learned
 
