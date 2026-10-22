@@ -36,9 +36,10 @@ Host-specific WSL settings are not automatically portable. Validate each host's 
 
 ## Current blockers
 
-- Wazuh services are running, but end-to-end endpoint ingestion is not proven.
-- The Alpine WSL endpoint subsequently returned expected version and log output after a targeted Windows ownership/access correction. Event delivery to Wazuh is still unproven.
-- The previous Docker data was not attached successfully to the current runtime; a clean deployment from the existing Compose project is now running. The preserved prior-data archive should remain untouched unless a supported recovery path is established.
+- End-to-end endpoint ingestion is verified through a temporary foreground Windows UDP relay, but the relay and Alpine syslog destination are not yet persistent across restarts.
+- Direct Alpine-to-Docker-published UDP/514 delivery was not observed during a bounded Manager-side capture. A Windows-side relay is the current proven workaround; the exact underlying cause remains unresolved.
+- The Alpine WSL endpoint returned expected version and log output after a targeted Windows ownership/access correction.
+- The previous Docker data was not attached successfully to the current runtime; a clean deployment from the existing Compose project is running. The preserved prior-data archive should remain untouched unless a supported recovery path is established.
 
 ## Safe handling
 
@@ -52,3 +53,8 @@ Host-specific WSL settings are not automatically portable. Validate each host's 
 - [Docker Desktop WSL2 backend](https://docs.docker.com/desktop/features/wsl/)
 - [Docker Desktop backup and restore](https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/)
 - [Microsoft WSL command reference](https://learn.microsoft.com/windows/wsl/reference)
+
+
+## Portability implication — 22 October 2026
+
+The current relay workaround depends on a Windows user-session process and WSL/Docker gateway addresses. For a portable setup, treat the relay as a host-specific adapter that must discover current addresses, start only after WSL/Docker are available, and be verified after restart. Do not call the lab plug-and-play until these steps have been validated on a second start/session or another host. A supported Linux VM with the Wazuh agent remains a longer-term alternative for richer endpoint telemetry.
