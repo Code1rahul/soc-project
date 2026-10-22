@@ -9,8 +9,8 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 - Wazuh Manager, Indexer, and Dashboard version 4.14.8 are running.
 - Dashboard login and browser API requests have been verified.
 - Dashboard and Indexer are restricted to local access for the current validation phase.
-- The Alpine WSL endpoint (`AlpineLab`) has returned the expected version and log output after a targeted Windows ownership/access correction. End-to-end event ingestion is still pending.
-- Wazuh's UDP syslog receiver is configured and running, but end-to-end event ingestion is **not yet proven**.
+- The Alpine WSL endpoint (`AlpineLab`) is sending its normal BusyBox syslog stream to a temporary foreground Windows UDP relay on the WSL gateway (UDP/15144), which forwards to the Manager's published UDP/514 endpoint.
+- End-to-end ingestion through the relay is **verified**: a marker generated with Alpine's normal `logger` path appeared in Wazuh `alerts.json` under SSH rule 5710, level 5. The direct Alpine-to-Docker-published UDP/514 path remains unresolved; the relay is a proven workaround but is not yet persistent.
 - A controlled sequence of failed SSH authentications followed by a successful login was previously observed in the lab logs.
 - Nmap established a service baseline, and a normal SSH packet capture was inspected. Encrypted SSH payload did not expose interactive commands.
 
@@ -31,13 +31,18 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 
 ## Next milestones
 
-1. Recheck Wazuh and AlpineLab health at session start.
-2. Run a bounded archive-logging test to prove the configured syslog path.
-3. Restore the original archive setting and confirm the test event was received.
-4. Generate controlled failed SSH authentications and validate detection after ingestion succeeds.
-5. Build a timestamped investigation timeline with evidence and limitations.
-6. Publish a sanitized technical walkthrough and learning summary.
+1. Make Alpine's syslog destination (UDP/15144) persistent in its startup configuration.
+2. Make the foreground Windows relay start reliably after WSL/Docker networking is ready, with clear logs and no broad network binding.
+3. Verify an alert is searchable in the Indexer/Dashboard while JSON archiving remains disabled.
+4. Verify relay recovery after a controlled WSL restart and recheck Indexer health.
+5. Build and validate repeated-failed-SSH detection, then create an incident timeline with evidence and limitations.
+6. Publish a sanitized technical walkthrough and learning summary after the persistent path is verified.
 
 ## Security and privacy
 
 Keep the dashboard and Indexer local-only during development. Open only the minimum necessary ingestion path when endpoint networking is validated. Never publish credentials, private keys, personal identifiers, raw captures, or machine-specific storage details.
+
+
+## Verified ingestion checkpoint — 22 October 2026
+
+A controlled synthetic SSH-failure event was sent through Alpine's normal local logging path. The foreground Windows relay logged a forwarded datagram, and the exact marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` was found in Wazuh `alerts.json` with rule 5710, level 5. The original Manager configuration was preserved; `logall_json=no` remains the intended setting. The relay and Alpine syslog destination are currently temporary runtime settings. Do not describe the setup as restart-persistent until startup behavior is validated.
