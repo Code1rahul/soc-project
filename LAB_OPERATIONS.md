@@ -44,11 +44,13 @@ A container being `Up` does not alone confirm Indexer health. Check Indexer clus
 
 Open the dashboard locally at `https://localhost`. A self-signed certificate warning may appear in this lab environment.
 
-## Alpine endpoint status
+## Current Alpine endpoint and relay status
 
-The intended endpoint distribution is `AlpineLab`. Its prior known configuration used OpenSSH and BusyBox syslog, with messages in `/var/log/messages`. However, its most recent startup attempt failed at WSL disk attachment with `E_ACCESSDENIED`. Troubleshoot that host-level error with read-only checks before changing permissions or attempting any filesystem recovery.
+The project endpoint is `AlpineLab`, using OpenSSH and BusyBox syslog with local messages in `/var/log/messages`. A prior WSL `E_ACCESSDENIED` issue stopped occurring after a targeted Windows ownership/access correction; do not repeat permission or filesystem changes unless it returns.
 
-## Configure event collection only after Alpine starts
+The verified transport workaround is a foreground Windows PowerShell UDP relay: Alpine's running syslogd targets the current WSL gateway on UDP/15144, the relay accepts only the current AlpineLab source address, and forwards to the Manager's published UDP/514 endpoint. The normal Alpine `logger` path generated a confirmed rule 5710, level 5 alert. This relay and the Alpine syslog target are runtime-only at this point; a closed relay window or a WSL restart may interrupt collection.
+
+## Event collection and current relay workflow
 
 A Docker port mapping alone does not configure a Wazuh syslog receiver. Wazuh Manager must be configured explicitly for remote syslog with the correct protocol, port, and a narrow sender allowlist. Keep the Dashboard and Indexer local-only. After the intended sender address and network route are verified, expose only the ingestion port needed for the lab test.
 
