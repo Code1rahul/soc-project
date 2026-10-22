@@ -8,7 +8,9 @@ Build a reproducible SOC practice environment to collect authentication telemetr
 
 Wazuh Manager, Indexer, and Dashboard 4.14.8 are running. The dashboard login succeeds. The Compose configuration is valid, and the dashboard and indexer are currently bound to local access only.
 
-The lab endpoint is an Alpine WSL2 distribution registered as `AlpineLab`. Earlier checks verified Alpine 3.24.2, user `analyst`, SSH, and local syslog configuration. An earlier attempt to start it failed with WSL `E_ACCESSDENIED`. The user subsequently confirmed that the expected Alpine version and log output returned after a targeted Windows ownership/access correction. The root cause is not definitively established. Endpoint-to-Wazuh event ingestion remains unproven.
+The lab endpoint is an Alpine WSL2 distribution registered as `AlpineLab`. Earlier checks verified Alpine 3.24.2, user `analyst`, SSH, and local syslog configuration. An earlier WSL `E_ACCESSDENIED` issue stopped occurring after a targeted Windows ownership/access correction; its underlying cause was not definitively established.
+
+On 22 October 2026, endpoint-to-Wazuh ingestion was proven through a temporary foreground Windows UDP relay. Alpine's normal `logger`/BusyBox `syslogd` path sent a unique marker to the relay on the WSL gateway at UDP/15144; the relay forwarded it to the Manager's published UDP/514 endpoint; the marker appeared in `alerts.json` as rule 5710, level 5. The direct Alpine-to-published-UDP/514 path remains unresolved. The relay and Alpine forwarding destination are not yet persistent across restart.
 
 The previous Docker data could not be attached successfully to the current Docker Desktop setup. The existing Compose project was used to deploy a clean Wazuh stack. A prior-data copy remains preserved separately; don't assume its containers, images, or volumes have been recovered.
 
@@ -70,3 +72,26 @@ A unique synthetic event was written to the Alpine local log, but no matching re
 
 ### Next evidence milestone
 Temporarily enable Wazuh JSON archive logging for one controlled test; send a newly marked synthetic syslog event; search for it in the Manager archive; restore the original archive setting and verify restoration. If received, verify indexing and rule behavior. Then generate controlled failed SSH attempts, confirm a detection, and create a timestamped incident timeline. Clearly distinguish synthetic test events from genuine authentication failures.
+
+
+## Verified syslog relay checkpoint — 22 October 2026
+
+### Evidence
+- A synthetic marker sent from the Indexer container appeared in `archives.json` while `logall_json=yes` was enabled temporarily. The exact original Manager configuration was restored and its hash verified; the active setting is `logall_json=no`.
+- Windows UDP on the WSL gateway received a test datagram from AlpineLab.
+- A direct Windows-generated datagram to the published Manager endpoint was seen in the Manager network namespace.
+- Direct Alpine-to-published Manager UDP/514 traffic was not observed in the bounded Manager-side capture.
+- A one-message Windows relay test successfully generated a rule 5710, level 5 alert.
+- Alpine's normal syslog forwarding was then reconfigured at runtime to send to the relay on UDP/15144. Marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` was present in the local Alpine log, the relay logged forwarding, and the matching alert was present in `alerts.json` with rule 5710, level 5.
+
+### Interpretation
+The relay path is a verified workaround; the underlying cause of the direct Alpine-to-Docker-published-port behavior is not conclusively identified. Do not claim the direct path is fixed. The current relay and Alpine syslog process changes are runtime-only.
+
+### Remaining work
+1. Make Alpine syslogd's UDP/15144 relay destination persistent in its startup configuration.
+2. Configure reliable relay startup after WSL/Docker networking is available, with narrow binding, current-address discovery, and operational logs.
+3. Confirm the alert is searchable in the Indexer/Dashboard while `logall_json=no`.
+4. Recheck Indexer health and validate relay recovery after a controlled WSL restart.
+5. Build repeated-failed-SSH detection, a timestamped incident timeline, and a sanitized evidence package.
+
+Keep Dashboard/Indexer local-only. Do not broaden firewall rules or bind UDP/514 to all host interfaces. No storage changes were made.
