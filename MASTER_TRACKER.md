@@ -1,6 +1,6 @@
 # Master Tracker — SOC Home Lab
 
-**Updated:** 22 October 2026  
+**Updated:** 10 November 2026  
 **Project:** Wazuh + Alpine WSL2 + SSH event investigation
 
 ## Verified status
@@ -16,11 +16,14 @@
 - [x] `AlpineLab` returned the expected version and log output after a targeted Windows ownership/access correction; no further permission changes are planned unless the error recurs.
 - [ ] Confirm current Indexer cluster health after the latest service restarts.
 - [x] Configure the Wazuh Manager remote syslog receiver on UDP/514 with a narrow allowlist.
-- [x] Prove normal Alpine syslog ingestion through the temporary Windows relay: marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` generated Wazuh rule 5710, level 5.
-- [ ] Make the Windows relay persistent and restart-safe; it is currently a foreground PowerShell process.
-- [ ] Update Alpine's startup configuration to forward to the relay on UDP/15144; the running syslogd process was changed at runtime, but persistence is not yet confirmed.
-- [ ] Verify the alert is searchable in the Indexer/Dashboard.
-- [ ] Build and validate a detection for repeated failed SSH authentication.
+- [x] Prove normal Alpine syslog ingestion through the Windows relay and generate Wazuh rule 5710, level 5.
+- [x] Update Alpine's startup script to discover the current WSL gateway and forward syslog to UDP/15144.
+- [x] Create and start the Windows user-logon scheduled task and relay supervisor; logs confirm the relay is listening and Alpine services are verified.
+- [x] Confirm a fresh marker (`SOC_LAB_PERSISTENCE_20261110_214100`) generated a rule 5710, level 5 alert, visible in Wazuh Discover.
+- [x] Confirm routine JSON raw-event archiving remains disabled (`logall_json=no`).
+- [ ] Verify full restart recovery after WSL/Windows sign-out or reboot; the scheduled task was started and verified during the current session, but a cold-start test remains outstanding.
+- [ ] Conduct real SSH authentication attempts (rather than synthetic syslog messages) and analyze the resulting Wazuh alerts.
+- [ ] Validate repeated-failure/brute-force correlation and document false-positive limitations.
 - [ ] Create a timestamped incident timeline and sanitized evidence package.
 
 ## Architecture
@@ -58,16 +61,16 @@ The project endpoint distribution is `AlpineLab`; earlier verification reported 
 - A normal SSH packet capture was inspected; TCP metadata was visible, while the encrypted payload did not expose interactive commands.
 - Directly replacing the active Docker data disk with the previous disk failed during Docker Desktop provisioning. The old data copy remains archived; the attempt is not considered a successful recovery. Do not repeat manual data-disk replacement.
 
-## Execution plan — current fixed order (22 October 2026)
+## Execution plan — current fixed order (10 November 2026)
 
-1. **Persist Alpine forwarding:** locate the Alpine startup configuration and change the syslog target from direct UDP/514 to the WSL-gateway relay listener on UDP/15144. Preserve dynamic gateway discovery.
-2. **Make the relay restart-safe:** define a user-scoped Windows startup task that launches only after WSL and Docker are available; retain gateway-only binding, dynamic Alpine IP discovery, and operational logs.
-3. **Validate persistence:** after the configuration changes are made, perform one planned restart-recovery check and confirm a normal syslog marker becomes an alert with `logall_json=no`.
-4. **Verify search/UI:** confirm the alert is searchable in the Indexer/Dashboard and recheck Indexer cluster health after the recent container restarts.
-5. **Build SSH detection:** simulate repeated failed SSH authentication, validate rule/correlation behavior and false-positive limitations, and distinguish synthetic events from actual login attempts.
-6. **Investigate and report:** build a timestamped incident timeline, sanitized evidence package, and short detection rationale.
-7. **Document portability limits:** record that the direct Alpine-to-published-UDP path remains unresolved and that the current relay is a workaround, not proof of a Docker/WSL root cause.
+1. **Run the real SSH practical:** generate a small controlled set of actual SSH authentication failures against AlpineLab and collect the resulting Wazuh alerts. Keep all activity on this isolated lab endpoint.
+2. **Validate correlation:** inspect the installed SSH rules and determine whether repeated failures from the same source produce the expected brute-force correlation alert. Record event counts, time window, rule IDs/levels, and source context.
+3. **Investigate:** distinguish nonexistent-user attempts from failures against a valid test account; correlate any subsequent successful login only if deliberately performed and clearly labelled.
+4. **Build the incident record:** create a timestamped timeline, analyst triage notes, MITRE ATT&CK mapping, recommended containment/response, false-positive considerations, and evidence references.
+5. **Complete operational assurance:** check Indexer cluster health and perform a planned WSL/Windows logon recovery test to validate the scheduled relay supervisor and Alpine startup automation.
+6. **Publish sanitized evidence:** update the report, screenshots, and practical walkthrough without secrets, private identifiers, or machine-specific storage details.
 
+The transport pipeline and dashboard visibility are already verified; do not return to the old ingestion troubleshooting unless a new failure appears.
 ## Working and safety rules
 
 - No more Docker storage changes during endpoint troubleshooting.
@@ -186,3 +189,13 @@ No more Docker storage changes are planned. No machine-specific storage paths or
 6. Update the project report/evidence after each milestone is actually verified.
 
 No Docker storage changes, firewall rule changes, broad port bindings, or GitHub file changes were made by the diagnostic tests. Do not publish machine-specific storage paths or sizes.
+
+## Verified persistence and Dashboard checkpoint — 10 November 2026
+
+- Windows 10-specific installer updated the Alpine startup script to forward to the dynamically discovered WSL gateway on UDP/15144; an exact pre-change backup was created.
+- The `SOC Lab Syslog Relay` user-logon scheduled task was registered and manually started successfully. Its supervisor log confirms it launched a relay worker, bound only to the WSL gateway, and explicitly verified Alpine `syslogd` and `sshd` services.
+- The relay log recorded datagrams forwarded from AlpineLab to the Manager's UDP/514 endpoint.
+- A fresh Alpine `logger` event using a synthetic SSH failure payload generated marker `SOC_LAB_PERSISTENCE_20261110_214100`. The corresponding alert appeared in Manager `alerts.json` as rule 5710, level 5, and was visible in Wazuh Discover under `wazuh-alerts-*`.
+- `logall_json=no` remains configured. No archive-mode change was required for this verification.
+- Not yet validated: full WSL termination/restart or Windows sign-out/reboot recovery. Do not claim cold-start persistence until that test passes.
+- Next practical work: actual SSH authentication attempts, brute-force correlation, alert triage, and an incident timeline. Synthetic syslog markers must remain distinguished from actual SSH login attempts.
