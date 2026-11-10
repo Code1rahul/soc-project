@@ -58,3 +58,9 @@ Host-specific WSL settings are not automatically portable. Validate each host's 
 ## Portability implication — 22 October 2026
 
 The current relay workaround depends on a Windows user-session process and WSL/Docker gateway addresses. For a portable setup, treat the relay as a host-specific adapter that must discover current addresses, start only after WSL/Docker are available, and be verified after restart. Do not call the lab plug-and-play until these steps have been validated on a second start/session or another host. A supported Linux VM with the Wazuh agent remains a longer-term alternative for richer endpoint telemetry.
+
+## Scheduled relay automation checkpoint — 10 November 2026
+
+A Windows 10-compatible user-logon scheduled task and supervisor are now registered. The supervisor explicitly starts/verifies Alpine services after bringing up the relay, avoiding reliance on the WSL `[boot] command` setting on this Windows 10 host. Alpine's startup script forwards to the dynamically discovered WSL gateway on UDP/15144. The task was started and the relay/Alpine service state verified during the current user session.
+
+The normal Alpine logger path produced a rule 5710 level 5 alert visible in Wazuh Discover. The exact direct Alpine-to-Docker UDP/514 path remains unresolved. A full Windows sign-out/reboot and WSL cold-start check remains necessary before this is described as restart-resilient or portable.
