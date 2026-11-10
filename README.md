@@ -9,8 +9,9 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 - Wazuh Manager, Indexer, and Dashboard version 4.14.8 are running.
 - Dashboard login and browser API requests have been verified.
 - Dashboard and Indexer are restricted to local access for the current validation phase.
-- The Alpine WSL endpoint (`AlpineLab`) is sending its normal BusyBox syslog stream to a temporary foreground Windows UDP relay on the WSL gateway (UDP/15144), which forwards to the Manager's published UDP/514 endpoint.
-- End-to-end ingestion through the relay is **verified**: a marker generated with Alpine's normal `logger` path appeared in Wazuh `alerts.json` under SSH rule 5710, level 5. The direct Alpine-to-Docker-published UDP/514 path remains unresolved; the relay is a proven workaround but is not yet persistent.
+- The Alpine WSL endpoint (`AlpineLab`) forwards its normal BusyBox syslog stream to a Windows UDP relay on the WSL gateway (UDP/15144), which forwards to the Manager's published UDP/514 endpoint.
+- The Windows 10 user-logon scheduled task and relay supervisor have been registered and started successfully; supervisor logs confirm relay readiness and Alpine service startup.
+- End-to-end ingestion is **verified**: a fresh marker generated through Alpine's normal `logger` path appeared in Wazuh `alerts.json` under SSH rule 5710, level 5, and was visible in Wazuh Discover. The direct Alpine-to-Docker-published UDP/514 path remains unresolved; the Windows relay is the proven workaround. Full sign-out/reboot recovery is still pending.
 - A controlled sequence of failed SSH authentications followed by a successful login was previously observed in the lab logs.
 - Nmap established a service baseline, and a normal SSH packet capture was inspected. Encrypted SSH payload did not expose interactive commands.
 
@@ -31,12 +32,11 @@ A hands-on SOC learning project focused on authentication telemetry, network exp
 
 ## Next milestones
 
-1. Make Alpine's syslog destination (UDP/15144) persistent in its startup configuration.
-2. Make the foreground Windows relay start reliably after WSL/Docker networking is ready, with clear logs and no broad network binding.
-3. Verify an alert is searchable in the Indexer/Dashboard while JSON archiving remains disabled.
-4. Verify relay recovery after a controlled WSL restart and recheck Indexer health.
-5. Build and validate repeated-failed-SSH detection, then create an incident timeline with evidence and limitations.
-6. Publish a sanitized technical walkthrough and learning summary after the persistent path is verified.
+1. Conduct actual SSH authentication attempts against AlpineLab and inspect the resulting Wazuh alerts.
+2. Validate repeated-failure/brute-force correlation and document its threshold, source-IP correlation, and false-positive limits.
+3. Build a timestamped incident timeline and SOC Analyst L1 triage report.
+4. Verify full WSL/Windows logon recovery for the scheduled relay supervisor and recheck Indexer health.
+5. Publish a sanitized technical walkthrough and learning summary after the operational recovery check.
 
 ## Security and privacy
 
@@ -46,3 +46,9 @@ Keep the dashboard and Indexer local-only during development. Open only the mini
 ## Verified ingestion checkpoint — 22 October 2026
 
 A controlled synthetic SSH-failure event was sent through Alpine's normal local logging path. The foreground Windows relay logged a forwarded datagram, and the exact marker `SOC_LAB_NORMAL_SYSLOG_RELAY_20261022_210527` was found in Wazuh `alerts.json` with rule 5710, level 5. The original Manager configuration was preserved; `logall_json=no` remains the intended setting. The relay and Alpine syslog destination are currently temporary runtime settings. Do not describe the setup as restart-persistent until startup behavior is validated.
+
+## Verified relay automation and Dashboard checkpoint — 10 November 2026
+
+The Windows 10-specific installer updated Alpine's startup script to use the dynamic WSL gateway and UDP/15144, registered the `SOC Lab Syslog Relay` user-logon scheduled task, and created the supervisor. The task was started successfully during the session. Supervisor and relay logs confirm the listener, Alpine services, and forwarded datagrams.
+
+Marker `SOC_LAB_PERSISTENCE_20261110_214100` was generated through Alpine's normal `logger` path, raised SSH rule 5710 (level 5), and was visible in Wazuh Discover. Routine JSON archiving remains disabled. A full Windows sign-out/reboot recovery test has not yet been performed.
