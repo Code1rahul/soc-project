@@ -95,3 +95,23 @@ The relay path is a verified workaround; the underlying cause of the direct Alpi
 5. Build repeated-failed-SSH detection, a timestamped incident timeline, and a sanitized evidence package.
 
 Keep Dashboard/Indexer local-only. Do not broaden firewall rules or bind UDP/514 to all host interfaces. No storage changes were made.
+
+## Relay automation and Wazuh Discover checkpoint — 10 November 2026
+
+### Verified
+- On Windows 10 build 19045, a compatible installer updated Alpine's `/usr/local/bin/wsl-startup.sh` so it discovers the current WSL default gateway and forwards BusyBox syslog to UDP/15144. An exact dated backup of the prior startup script was created.
+- The installer created a Windows user-logon task named `SOC Lab Syslog Relay` and a relay supervisor. The task was started successfully during the session and reported `Running`.
+- Supervisor logs confirm that the relay worker started, bound only to the WSL gateway UDP/15144 endpoint, detected the current AlpineLab source address, and explicitly started/verified Alpine services.
+- Relay logs recorded datagrams forwarded from AlpineLab to the Manager UDP/514 endpoint.
+- A fresh marker, `SOC_LAB_PERSISTENCE_20261110_214100`, was generated using Alpine's normal `logger` command with a synthetic SSH failed-password payload. It appeared in Wazuh Manager `alerts.json` under rule 5710, level 5.
+- The matching event was visible in Wazuh Discover using `wazuh-alerts-*`.
+- The mounted Manager configuration still has `logall_json=no`; routine JSON archive logging remains disabled.
+
+### Evidence interpretation and limitations
+This verifies relay operation during the current Windows user session and confirms ingestion, rule evaluation, indexing, and Dashboard Discover visibility for the synthetic SSH log event. The event was generated with `logger`; it was not an actual SSH authentication attempt. The scheduled task was started and observed running, but a full Windows sign-out/reboot and WSL termination/recovery test has not yet been completed. Do not claim full cold-start recovery until that test passes.
+
+### Next practical phase
+1. Generate actual SSH authentication failures against the lab's own Alpine endpoint.
+2. Inspect Wazuh events and validate repeated-failure correlation using the installed SSH rules.
+3. Build an incident timeline, triage analysis, MITRE ATT&CK mapping, recommended response, false-positive considerations, and evidence index.
+4. Separately complete the planned WSL/Windows recovery test and recheck Indexer cluster health.
