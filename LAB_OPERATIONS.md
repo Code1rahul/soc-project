@@ -159,8 +159,17 @@ Do not make further storage changes or publish machine-specific storage paths an
 
 - Verified path: Alpine `logger` → BusyBox `syslogd` forwarding to the WSL gateway on UDP/15144 → foreground Windows relay → published Manager UDP/514 → rule 5710 alert.
 - The relay only binds to the discovered WSL gateway and accepts traffic from the current AlpineLab address; it records forwarding/error status without logging every event payload.
-- Relay window must remain open until automatic startup is implemented and validated.
-- The running Alpine syslogd process was redirected at runtime. The Alpine startup configuration has not yet been updated, so a distro restart may revert its target.
-- Manager configuration is restored with `logall_json=no`; allowlist contains Alpine's current address and the Docker gateway. Confirm current network addresses before any future network changes.
+- The Windows user-logon scheduled task `SOC Lab Syslog Relay` and supervisor were registered and started successfully on 10 November 2026. The supervisor explicitly launches/verifies the Alpine startup script after the relay listener is ready.
+- Alpine's startup script now discovers the WSL gateway and forwards to UDP/15144. This config change is backed up.
+- The relay supervisor and forwarding path were verified during the current session. A full Windows sign-out/reboot and WSL cold-start recovery check is still outstanding.
+- Manager configuration remains at `logall_json=no`; the allowlist contains the Alpine source and Docker gateway. Confirm current network addresses before any network edits.
 
 Do not change storage settings, broaden the UDP bind to all interfaces, or expose Dashboard/Indexer beyond loopback.
+
+## Scheduled relay operations — 10 November 2026
+
+The Windows 10-compatible setup uses a user-logon scheduled task named `SOC Lab Syslog Relay`. The supervisor waits for Docker/Wazuh readiness, launches the relay on the discovered WSL gateway UDP/15144, and explicitly starts/verifies Alpine services. Alpine's startup script forwards BusyBox syslog to the gateway on UDP/15144.
+
+The supervisor was started manually through Task Scheduler during the session and reported `Running`. The relay log confirmed forwarded Alpine datagrams. A fresh Alpine `logger` event was found in Manager `alerts.json` as rule 5710, level 5 and visible in Discover. Do not enable `logall_json` for routine operation.
+
+Full restart recovery has not yet been tested. After a controlled WSL/Windows logon restart, verify the scheduled task state, supervisor log, relay listener, Alpine `syslogd`/ `sshd` processes, and one actual SSH event before claiming recovery is complete.
